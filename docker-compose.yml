@@ -1,0 +1,83 @@
+services:
+  # --- PORTFOLIO: DATABASE ---
+  portfolio-db:
+    image: docker.io/library/postgres:15-alpine
+    container_name: portfolio-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${PORTFOLIO_DB_USER}
+      POSTGRES_PASSWORD: ${PORTFOLIO_DB_PASSWORD}
+      POSTGRES_DB: ${PORTFOLIO_DB_NAME}
+    networks:
+      - nas-net
+    volumes:
+      - portfolio-db-data:/var/lib/postgresql/data:z
+      - ./backend-express/src/db.postgres.sql:/docker-entrypoint-initdb.d/init.sql:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- PORTFOLIO: BACKEND API ---
+  portfolio-backend:
+    build: ./backend-express
+    image: portfolio-backend:latest
+    container_name: portfolio-backend
+    restart: always
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - PORT=${PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASS=${MAIL_PASS}
+      - MAIL_TO=${MAIL_TO}
+    networks:
+      - nas-net
+    depends_on:
+      portfolio-db:
+        condition: service_healthy
+
+  # --- PORTFOLIO: FRONTEND VISITEURS ---
+  portfolio-visiteurs:
+    build:
+      context: ./frontend-visiteurs
+      args:
+        - VITE_BASE_URL=${VITE_BASE_URL_VISITEURS}
+    image: portfolio-visiteurs:latest
+    container_name: portfolio-visiteurs
+    restart: always
+    environment:
+      - VITE_BASE_URL=${VITE_BASE_URL_VISITEURS}
+    volumes:
+      - ./frontend-visiteurs/public/audio:/usr/share/nginx/html/audio:ro,z
+    networks:
+      - nas-net
+
+  # --- PORTFOLIO: FRONTEND ADMIN ---
+  portfolio-admin:
+    build:
+      context: ./frontend-admin
+      args:
+        - VITE_BASE_URL=${VITE_BASE_URL_ADMIN}
+    image: portfolio-admin:latest
+    container_name: portfolio-admin
+    restart: always
+    environment:
+      - VITE_BASE_URL=${VITE_BASE_URL_ADMIN}
+    networks:
+      - nas-net
+    ports:
+      - "8080:80"
+
+volumes:
+  portfolio-db-data:
+
+networks:
+  nas-net:
+    external: true

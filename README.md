@@ -27,6 +27,8 @@ portfolio/
 │
 ├── .gitignore             # Règles d'exclusion Git globales
 ├── .dockerignore          # Règles d'exclusion Docker globales
+├── .env.sample            # Modèle de configuration globale Docker Compose
+├── docker-compose.yml     # Orchestration des services (DB, API, Frontends)
 └── README.md
 ```
 
@@ -121,26 +123,53 @@ npm run dev
 
 ---
 
-## 🐳 Déploiement Docker
+## 🐳 Déploiement Containerisé (Docker / Podman)
 
-Chaque sous-projet dispose d'un `Dockerfile` optimisé pour la production :
+L'application est entièrement orchestrée via `docker-compose.yml` (compatible Docker et Podman).
 
-- **Backend** : Build TypeScript multi-stage léger Node.js Alpine.
-- **Frontends** : Compilation statique Vite suivie d'un packaging Nginx Alpine avec headers de sécurité et mise en cache des assets.
+### 1. Configuration de l'environnement
+
+Créez votre fichier `.env` à la racine à partir du modèle :
 
 ```bash
-# Exemple de build backend
+cp .env.sample .env
+```
+
+Renseignez vos identifiants PostgreSQL, le secret JWT, la configuration SMTP ainsi que les URLs d'API pour les frontends (`VITE_BASE_URL_VISITEURS`, `VITE_BASE_URL_ADMIN`).
+
+### 2. Lancement avec Docker Compose / Podman
+
+```bash
+# Avec Docker Compose
+docker compose up -d --build
+
+# Avec Podman Compose
+podman compose up -d --build
+```
+
+Cette commande orchestre les 4 conteneurs :
+- **`portfolio-db`** : Base PostgreSQL 15 (volume persistant `portfolio-db-data` et initialisation SQL automatique).
+- **`portfolio-backend`** : API Node.js/Express 5 TypeScript multi-stage.
+- **`portfolio-visiteurs`** : Frontend public sous Nginx avec volume monté pour les fichiers audio.
+- **`portfolio-admin`** : Dashboard d'administration sous Nginx (exposé sur le port `8080`).
+
+### 3. Build manuel individuel (optionnel)
+
+Si vous préférez compiler les images individuellement :
+
+```bash
+# Backend API
 docker build -t portfolio-backend ./backend-express
 
-# Exemple de build frontend visiteurs
-docker build --build-arg VITE_BASE_URL=https://api.paguera.fr/api -t portfolio-visiteurs ./frontend-visiteurs
+# Frontend Visiteurs
+docker build --build-arg VITE_BASE_URL=https://api.example.com/api -t portfolio-visiteurs ./frontend-visiteurs
 
-# Exemple de build frontend admin
-docker build --build-arg VITE_BASE_URL=https://api.paguera.fr -t portfolio-admin ./frontend-admin
+# Frontend Admin
+docker build --build-arg VITE_BASE_URL=https://api.example.com -t portfolio-admin ./frontend-admin
 ```
 
 ---
 
 ## 📜 Licence
 
-Projet sous licence MIT.
+Projet sous licence GNU General Public License v3.0 (GPL-3.0). Consultez le fichier [LICENSE](LICENSE) pour plus de détails.
