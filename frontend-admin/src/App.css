@@ -1,0 +1,4 @@
+/* Basic styles for App component */
+.app-container {
+  min-height: 100vh;
+}

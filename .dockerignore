@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.gitignore
+.vscode
+*.log
+.env
+.env.*
+!.env.sample
+!.env.example

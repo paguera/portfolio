@@ -1,0 +1,109 @@
+import React, { useEffect, useState } from "react";
+import { Outlet, useLocation, Link } from "react-router-dom";
+import Navbar from "./Navbar";
+import { apiFetch } from "../utils/api";
+
+const Layout: React.FC = () => {
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const location = useLocation();
+
+  const isSoundwavePage =
+    location.pathname.startsWith("/productions") ||
+    location.pathname.startsWith("/audio");
+
+  useEffect(() => {
+    const trackVisitor = async () => {
+      try {
+        let visitorUuid = localStorage.getItem("paguera_visitor_id");
+        if (!visitorUuid) {
+          visitorUuid = crypto.randomUUID();
+          localStorage.setItem("paguera_visitor_id", visitorUuid);
+        }
+
+        const data = await apiFetch<{ count: number }>("/visitors/track", {
+          method: "POST",
+          body: JSON.stringify({ visitorUuid }),
+        });
+        setVisitorCount(data.count);
+      } catch (error) {
+        console.error("Failed to track visitor count", error);
+      }
+    };
+
+    trackVisitor();
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col font-sans text-text-main">
+      <header className="bg-cyber-cyan text-white border-b-4 border-bg-main py-4 px-4 md:px-8 flex justify-between items-center sticky top-0 z-50 shadow-xl">
+        <Navbar />
+      </header>
+
+      <main
+        className={`grow w-full ${
+          isSoundwavePage
+            ? ""
+            : "container mx-auto px-4 md:px-8 py-8 md:py-12"
+        }`}
+      >
+        <Outlet />
+      </main>
+
+      <footer className="relative bg-cyber-cyan text-white border-t-4 border-bg-main py-8 px-4 md:px-8 text-center">
+        <div className="flex flex-wrap justify-center items-center gap-6 mb-4 text-[12px] tracking-[0.2em] font-black uppercase">
+          <a
+            href="https://github.com/paguera"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-cyber-yellow transition-colors"
+          >
+            GitHub
+          </a>
+          <span className="text-white/30 hidden sm:inline">|</span>
+          <a
+            href="https://www.linkedin.com/in/gabriel-fortier-3951a933b/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-cyber-yellow transition-colors"
+          >
+            LinkedIn
+          </a>
+          <span className="text-white/30 hidden sm:inline">|</span>
+          <a
+            href="https://youtube.com/@salepropre"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-cyber-yellow transition-colors"
+          >
+            YouTube
+          </a>
+
+          <span className="text-white/30 hidden sm:inline">|</span>
+        <Link
+          to="/contact"
+          className="hover:text-cyber-yellow transition-colors"
+        >
+          Contact
+        </Link>
+
+        </div>
+
+
+        <p className="opacity-60 text-[10px] tracking-[0.3em] font-black">
+          &copy; {new Date().getFullYear()} PAGUERA - ALL RIGHTS RESERVED.
+        </p>
+
+        {visitorCount !== null && (
+          <div className="absolute bottom-2 right-3 md:bottom-3 md:right-4 inline-flex items-center gap-1.5 bg-bg-main/50 border border-cyber-cyan/30 px-2.5 py-1 rounded-full text-[10px] font-mono tracking-normal shadow-sm opacity-70 hover:opacity-100 transition-opacity">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyber-cyan animate-pulse"></span>
+            <span className="text-gray-300">
+              VISITEURS : <strong className="text-cyber-cyan font-bold">{visitorCount}</strong>
+            </span>
+          </div>
+        )}
+      </footer>
+    </div>
+  );
+};
+
+export default Layout;

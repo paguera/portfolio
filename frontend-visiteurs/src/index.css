@@ -1,0 +1,55 @@
+@import "tailwindcss";
+@import "./colors.css";
+@plugin "@tailwindcss/typography";
+
+@theme {
+    --color-primary: var(--color-primary);
+    --color-secondary: var(--color-secondary);
+    --color-bg-main: var(--color-bg-main);
+    --color-bg-panel: var(--color-bg-panel);
+    --color-text-main: var(--color-text-main);
+    --color-text-muted: var(--color-text-muted);
+    --color-border-subtle: var(--color-border-subtle);
+    --color-cyber-cyan: var(--cyber-cyan);
+    --color-cyber-purple: var(--cyber-purple);
+    --color-cyber-blue: var(--cyber-blue);
+    --color-cyber-yellow: var(--cyber-yellow);
+}
+
+.tiptap {
+    &:focus {
+        outline: none;
+    }
+
+    ul {
+        list-style-type: disc;
+        padding-left: 1.5rem;
+    }
+
+    ol {
+        list-style-type: decimal;
+        padding-left: 1.5rem;
+    }
+}
+
+body {
+    @apply bg-bg-main text-text-main;
+    background-image: url("/temple1.svg"), radial-gradient(circle at top right, #0d1527, #080b11 60%);
+    background-size: 3%, auto;
+    background-attachment: scroll, fixed;
+}
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-tab-content {
+    animation: tabFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

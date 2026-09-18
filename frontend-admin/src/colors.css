@@ -1,0 +1,18 @@
+:root {
+  --cyber-cyan: #00f2ff;
+  --bitwig-orange: #ff8000;
+  --black: #000000;
+  --white: #ffffff;
+  --dark-gray: #1a1a1a;
+  --medium-gray: #333333;
+  --light-gray: #888888;
+
+  /* Theme mappings */
+  --color-primary: var(--bitwig-orange);
+  --color-secondary: var(--cyber-cyan);
+  --color-bg-main: #3a3939;
+  --color-bg-panel: var(--dark-gray);
+  --color-text-main: var(--white);
+  --color-text-muted: var(--light-gray);
+  --color-border-subtle: var(--medium-gray);
+}
