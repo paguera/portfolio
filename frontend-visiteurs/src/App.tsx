@@ -11,12 +11,14 @@ import { WelcomeSplash } from "./components/WelcomeSplash";
 
 function App() {
   const [showSplash, setShowSplash] = useState(() => {
-    const hasSeenSplash = sessionStorage.getItem("portfolio-splash-seen");
-    return !hasSeenSplash;
+    if (typeof window !== "undefined") {
+      const pathname = window.location.pathname;
+      return pathname === "/" || pathname === "";
+    }
+    return false;
   });
 
   const handleSplashComplete = () => {
-    sessionStorage.setItem("portfolio-splash-seen", "true");
     setShowSplash(false);
   };
 
