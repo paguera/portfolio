@@ -12,7 +12,7 @@ const Home: React.FC = () => {
           content="Bienvenue sur mon portfolio. Découvrez mon exposition de dessins d'art contemporain et mes projets."
         />
       </Helmet>
-      <div className="flex flex-col items-center justify-center min-h-[85vh] py-6">
+      <div className="flex flex-col items-center justify-center min-h-[70vh] md:min-h-[85vh] py-2 md:py-6">
         <ArtworkCarousel />
       </div>
     </>

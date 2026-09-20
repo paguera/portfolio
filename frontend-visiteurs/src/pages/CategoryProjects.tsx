@@ -96,10 +96,10 @@ const CategoryProjects: React.FC = () => {
                         href={article.demo_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between bg-primary text-cyber-yellow px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-bg-panel hover:text-white border border-primary transition-all"
+                        className="flex items-center justify-between border border-border-subtle p-3 text-xs font-black uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all text-text-main bg-bg-main/30"
                       >
                         <span>Lancer la démo</span>
-                        <span>→</span>
+                        <span>[demo]</span>
                       </a>
                     )}
 
