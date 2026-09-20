@@ -24,7 +24,7 @@ export async function apiFetch<T> (
 
     if (errorData.errors && Array.isArray(errorData.errors)) {
       errorMessage = errorData.errors
-        .map((err: any) => `${err.path || err.param}: ${err.msg}`)
+        .map((err: { path?: string; param?: string; msg?: string }) => `${err.path || err.param}: ${err.msg}`)
         .join('\n')
     }
 

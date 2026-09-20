@@ -24,7 +24,7 @@ async function apiFetch<T> (
 
     if (errorData.errors && Array.isArray(errorData.errors)) {
       errorMessage = errorData.errors
-        .map((err: any) => `${err.msg || err.message}`)
+        .map((err: { msg?: string; message?: string }) => `${err.msg || err.message}`)
         .join('\n')
     }
 

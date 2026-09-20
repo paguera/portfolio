@@ -929,7 +929,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [analyser, currentTrack]);
+  }, [analyser, currentTrack, strobeThreshold]);
 
   return (
     <canvas

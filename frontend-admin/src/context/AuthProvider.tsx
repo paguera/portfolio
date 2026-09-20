@@ -17,7 +17,7 @@ export default function AuthProvider ({
       try {
         const data = await apiFetch<{ user: User }>('/auth/me')
         setUser(data.user)
-      } catch (e) {
+      } catch {
         // Si /me échoue, c'est que le cookie est invalide ou absent
         setUser(null)
       } finally {
@@ -32,7 +32,7 @@ export default function AuthProvider ({
     try {
       const data = await apiFetch<{ user: User }>('/auth/me')
       setUser(data.user)
-    } catch (e) {
+    } catch {
       setUser(null)
     }
   }, [])

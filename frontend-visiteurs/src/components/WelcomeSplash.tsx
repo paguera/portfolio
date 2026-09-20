@@ -5,6 +5,16 @@ interface WelcomeSplashProps {
   onComplete: () => void;
 }
 
+const PARTICLES = Array.from({ length: 26 }, (_, i) => ({
+  id: i,
+  x: ((i * 37) % 100 - 50) * 14,
+  y: ((i * 53) % 100 - 50) * 8,
+  scale: ((i % 5) * 0.4 + 1.2),
+  delay: (i % 8) * 0.02,
+  bg: i % 2 === 0 ? '#facc15' : '#00f2fe',
+  shadow: i % 2 === 0 ? '0 0 10px #facc15' : '0 0 10px #00f2fe',
+}));
+
 export function WelcomeSplash({ onComplete }: WelcomeSplashProps) {
   const [phase, setPhase] = useState<'logo' | 'split' | 'done'>('logo');
   const [imgSrc, setImgSrc] = useState('/LOGO.avif');
@@ -139,26 +149,26 @@ export function WelcomeSplash({ onComplete }: WelcomeSplashProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              {[...Array(26)].map((_, i) => (
+              {PARTICLES.map((particle) => (
                 <motion.div
-                  key={i}
+                  key={particle.id}
                   className="absolute w-1.5 h-1.5 rounded-full"
                   style={{
                     left: '50%',
                     top: '50%',
-                    backgroundColor: i % 2 === 0 ? '#facc15' : '#00f2fe',
-                    boxShadow: i % 2 === 0 ? '0 0 10px #facc15' : '0 0 10px #00f2fe',
+                    backgroundColor: particle.bg,
+                    boxShadow: particle.shadow,
                   }}
                   initial={{ x: 0, y: 0, opacity: 1 }}
                   animate={{
-                    x: (Math.random() - 0.5) * 700,
-                    y: (Math.random() - 0.5) * 400,
+                    x: particle.x,
+                    y: particle.y,
                     opacity: 0,
-                    scale: Math.random() * 2 + 1,
+                    scale: particle.scale,
                   }}
                   transition={{
                     duration: 0.85,
-                    delay: Math.random() * 0.15,
+                    delay: particle.delay,
                     ease: 'easeOut',
                   }}
                 />

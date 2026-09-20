@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import UnifiedVisualizer from "./UnifiedVisualizer";
 import Playlist from "./Playlist";
 import { tracks as defaultTracks } from "./tracks";
@@ -122,7 +122,19 @@ const SoundwaveApp: React.FC = () => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const handleNext = () => {
+  const handleTrackSelect = useCallback((track: Track) => {
+    setCurrentTrack(track);
+    if (audioRef.current) {
+      audioRef.current.src = track.url;
+      initAudio();
+      resumeAudio();
+      audioRef.current.play().catch((err) => {
+        console.log("Playback blocked or interrupted: ", err);
+      });
+    }
+  }, [initAudio, resumeAudio]);
+
+  const handleNext = useCallback(() => {
     if (tracks.length === 0) return;
     let nextIndex = 0;
     if (isShuffle) {
@@ -132,9 +144,9 @@ const SoundwaveApp: React.FC = () => {
       nextIndex = (currentIndex + 1) % tracks.length;
     }
     handleTrackSelect(tracks[nextIndex]);
-  };
+  }, [tracks, isShuffle, currentTrack, handleTrackSelect]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (tracks.length === 0) return;
     let prevIndex = 0;
     if (currentTrack) {
@@ -143,7 +155,7 @@ const SoundwaveApp: React.FC = () => {
       if (prevIndex < 0) prevIndex = tracks.length - 1;
     }
     handleTrackSelect(tracks[prevIndex]);
-  };
+  }, [tracks, currentTrack, handleTrackSelect]);
 
   // Sync state with audio element
   useEffect(() => {
@@ -187,19 +199,7 @@ const SoundwaveApp: React.FC = () => {
       audio.removeEventListener("durationchange", handleDurationChange);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [currentTrack, isRepeat, isShuffle, volume, isMuted]);
-
-  const handleTrackSelect = (track: Track) => {
-    setCurrentTrack(track);
-    if (audioRef.current) {
-      audioRef.current.src = track.url;
-      initAudio();
-      resumeAudio();
-      audioRef.current.play().catch((err) => {
-        console.log("Playback blocked or interrupted: ", err);
-      });
-    }
-  };
+  }, [currentTrack, isRepeat, handleNext, volume, isMuted]);
 
   const handlePlayPause = () => {
     if (!currentTrack && tracks.length > 0) {
