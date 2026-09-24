@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080c16"/>
+      <stop offset="50%" stop-color="#0d1527"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#162036" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0e1626" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+
+    <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+
+    <!-- Filters for cyber glow -->
+    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="glowYellow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="glowPurple" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Marker arrows -->
+    <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 7 4, 0 7" fill="#00f2fe"/>
+    </marker>
+    <marker id="arrowYellow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 7 4, 0 7" fill="#facc15"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 7 4, 0 7" fill="#c084fc"/>
+    </marker>
+  </defs>
+
+  <style>
+    .title { font-family: 'JetBrains Mono', 'Segoe UI', monospace; font-size: 20px; font-weight: 900; fill: #ffffff; letter-spacing: 2px; }
+    .subtitle { font-family: 'JetBrains Mono', 'Segoe UI', monospace; font-size: 11px; fill: #94a3b8; letter-spacing: 1.5px; }
+    .card-title { font-family: 'JetBrains Mono', 'Segoe UI', monospace; font-size: 14px; font-weight: 800; letter-spacing: 1px; }
+    .card-text { font-family: 'JetBrains Mono', 'Segoe UI', monospace; font-size: 11px; fill: #cbd5e1; }
+    .card-meta { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: #64748b; font-weight: 700; }
+    .conn-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; fill: #94a3b8; }
+    .group-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="100%" height="100%" fill="url(#bgGrad)" rx="16"/>
+  <rect width="100%" height="100%" fill="none" stroke="#1e293b" stroke-width="2" rx="16"/>
+
+  <!-- Grid overlay -->
+  <g opacity="0.05">
+    <path d="M0,80 H1200 M0,160 H1200 M0,240 H1200 M0,320 H1200 M0,400 H1200 M0,480 H1200 M0,560 H1200 M0,640 H1200" stroke="#ffffff" stroke-width="1"/>
+    <path d="M100,0 V680 M200,0 V680 M300,0 V680 M400,0 V680 M500,0 V680 M600,0 V680 M700,0 V680 M800,0 V680 M900,0 V680 M1000,0 V680 M1100,0 V680" stroke="#ffffff" stroke-width="1"/>
+  </g>
+
+  <!-- Header Section -->
+  <g transform="translate(50, 45)">
+    <circle cx="12" cy="12" r="10" fill="#facc15" opacity="0.2"/>
+    <circle cx="12" cy="12" r="4" fill="#facc15"/>
+    <text x="32" y="16" class="title">ARCHITECTURE INFRASTRUCTURE &amp; DÉPLOIEMENT</text>
+    <text x="32" y="34" class="subtitle">PORTFOLIO MULTI-SERVICES CONTENEURISÉ · DOCKER COMPOSE &amp; REVERSE PROXY</text>
+    
+    <g transform="translate(930, 0)">
+      <rect width="170" height="32" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+      <text x="14" y="20" class="card-meta" fill="#38bdf8">ENV : PRODUCTION</text>
+      <circle cx="145" cy="16" r="4" fill="#22c55e"/>
+    </g>
+  </g>
+
+  <!-- ==================== EXTERNAL CLIENTS (LEFT) ==================== -->
+  <g transform="translate(50, 140)">
+    <!-- Visiteur Web -->
+    <rect width="180" height="110" rx="10" fill="url(#cardGrad)" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.6"/>
+    <text x="20" y="32" class="card-title" fill="#38bdf8">VISITEURS WEB</text>
+    <text x="20" y="56" class="card-text">Navigateur client</text>
+    <text x="20" y="74" class="card-text">Audio Visualizer &amp; Art</text>
+    <text x="20" y="94" class="card-meta">PORT : 80 / 443 (HTTPS)</text>
+
+    <!-- Administrateur -->
+    <g transform="translate(0, 240)">
+      <rect width="180" height="110" rx="10" fill="url(#cardGrad)" stroke="#facc15" stroke-width="1.5" stroke-opacity="0.6"/>
+      <text x="20" y="32" class="card-title" fill="#facc15">ADMINISTRATEUR</text>
+      <text x="20" y="56" class="card-text">Panneau de gestion</text>
+      <text x="20" y="74" class="card-text">CRUD Projets &amp; Médias</text>
+      <text x="20" y="94" class="card-meta">PORT : 8080 (HTTPS/VPN)</text>
+    </g>
+  </g>
+
+  <!-- ==================== DOCKER HOST BOUNDARY ==================== -->
+  <g transform="translate(290, 110)">
+    <!-- Main Docker Border -->
+    <rect width="860" height="520" rx="14" fill="#090e1a" fill-opacity="0.8" stroke="#00f2fe" stroke-width="1.5" stroke-dasharray="8 6" stroke-opacity="0.4"/>
+    
+    <!-- Docker Host Header -->
+    <rect x="20" y="16" width="340" height="28" rx="6" fill="#00f2fe" fill-opacity="0.1"/>
+    <text x="32" y="35" class="group-label" fill="#00f2fe">🐳 DOCKER COMPOSE ORCHESTRATION</text>
+    <text x="400" y="35" class="card-meta" fill="#64748b">RÉSEAU INTERNE : portfolio-network (bridge)</text>
+
+    <!-- 1. Frontend Visiteurs Container -->
+    <g transform="translate(40, 70)">
+      <rect width="230" height="150" rx="8" fill="url(#cardGrad)" stroke="#00f2fe" stroke-width="1.5"/>
+      <rect x="0" y="0" width="230" height="6" rx="3" fill="url(#cyanGrad)"/>
+      <text x="16" y="30" class="card-title" fill="#00f2fe">portfolio-visiteurs</text>
+      <text x="16" y="52" class="card-text">Nginx 1.25 Alpine</text>
+      <text x="16" y="70" class="card-text">React 19 + Vite + Tailwind</text>
+      <text x="16" y="88" class="card-text">Reverse Proxy /api</text>
+      <line x1="16" y1="102" x2="214" y2="102" stroke="#1e293b" stroke-width="1"/>
+      <text x="16" y="122" class="card-meta" fill="#38bdf8">EXPOSE : 80:80</text>
+      <text x="16" y="138" class="card-meta" fill="#94a3b8">VOLUME : /public/tracks</text>
+    </g>
+
+    <!-- 2. Frontend Admin Container -->
+    <g transform="translate(40, 290)">
+      <rect width="230" height="150" rx="8" fill="url(#cardGrad)" stroke="#facc15" stroke-width="1.5"/>
+      <rect x="0" y="0" width="230" height="6" rx="3" fill="url(#yellowGrad)"/>
+      <text x="16" y="30" class="card-title" fill="#facc15">portfolio-admin</text>
+      <text x="16" y="52" class="card-text">Nginx 1.25 Alpine</text>
+      <text x="16" y="70" class="card-text">React 19 + Auth Guard</text>
+      <text x="16" y="88" class="card-text">Token JWT &amp; Session</text>
+      <line x1="16" y1="102" x2="214" y2="102" stroke="#1e293b" stroke-width="1"/>
+      <text x="16" y="122" class="card-meta" fill="#fbbf24">EXPOSE : 8080:80</text>
+      <text x="16" y="138" class="card-meta" fill="#94a3b8">PROTECTION : RBAC</text>
+    </g>
+
+    <!-- 3. Backend Express API Container (Center) -->
+    <g transform="translate(340, 180)">
+      <rect width="240" height="170" rx="8" fill="url(#cardGrad)" stroke="#a855f7" stroke-width="2" filter="url(#glowPurple)"/>
+      <rect width="240" height="170" rx="8" fill="url(#cardGrad)" stroke="#c084fc" stroke-width="1.5"/>
+      <rect x="0" y="0" width="240" height="6" rx="3" fill="url(#purpleGrad)"/>
+      <text x="16" y="30" class="card-title" fill="#c084fc">portfolio-backend</text>
+      <text x="16" y="52" class="card-text">Node.js 20 Multi-stage</text>
+      <text x="16" y="70" class="card-text">Express 5 + TypeScript</text>
+      <text x="16" y="88" class="card-text">Zod validation · JWT Auth</text>
+      <text x="16" y="106" class="card-text">Nodemailer SMTP Service</text>
+      <line x1="16" y1="120" x2="224" y2="120" stroke="#1e293b" stroke-width="1"/>
+      <text x="16" y="140" class="card-meta" fill="#c084fc">PORT INTERNE : 3000</text>
+      <text x="16" y="156" class="card-meta" fill="#94a3b8">HEALTHCHECK : /api/health</text>
+    </g>
+
+    <!-- 4. PostgreSQL Database Container (Right) -->
+    <g transform="translate(640, 180)">
+      <rect width="180" height="170" rx="8" fill="url(#cardGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+      <rect x="0" y="0" width="180" height="6" rx="3" fill="url(#cyanGrad)"/>
+      <text x="16" y="30" class="card-title" fill="#38bdf8">portfolio-db</text>
+      <text x="16" y="52" class="card-text">PostgreSQL 15 Alpine</text>
+      <text x="16" y="70" class="card-text">Relation Many-to-Many</text>
+      <text x="16" y="88" class="card-text">Triggers &amp; Index B-Tree</text>
+      <line x1="16" y1="120" x2="164" y2="120" stroke="#1e293b" stroke-width="1"/>
+      <text x="16" y="140" class="card-meta" fill="#38bdf8">PORT INTERNE : 5432</text>
+      <text x="16" y="156" class="card-meta" fill="#22c55e">HEALTHCHECK : pg_isready</text>
+    </g>
+
+    <!-- 5. Persistent Volumes (Bottom Right) -->
+    <g transform="translate(480, 410)">
+      <rect width="340" height="75" rx="8" fill="#0b1120" stroke="#475569" stroke-width="1"/>
+      <text x="16" y="24" class="group-label" fill="#94a3b8">💾 VOLUMES PERSISTANTS DOCKER</text>
+      <g transform="translate(16, 36)">
+        <rect width="145" height="26" rx="4" fill="#1e293b"/>
+        <text x="8" y="17" class="card-meta" fill="#e2e8f0">portfolio-db-data</text>
+      </g>
+      <g transform="translate(175, 36)">
+        <rect width="145" height="26" rx="4" fill="#1e293b"/>
+        <text x="8" y="17" class="card-meta" fill="#e2e8f0">audio-tracks-data</text>
+      </g>
+    </g>
+
+    <!-- ==================== INTERNAL FLOW CONNECTIONS ==================== -->
+    <!-- Front Visiteurs -> Backend API -->
+    <path d="M 270,145 L 340,240" fill="none" stroke="#00f2fe" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrowCyan)"/>
+    <text x="285" y="180" class="conn-label" fill="#00f2fe">/api</text>
+
+    <!-- Front Admin -> Backend API -->
+    <path d="M 270,365 L 340,285" fill="none" stroke="#facc15" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrowYellow)"/>
+    <text x="285" y="340" class="conn-label" fill="#facc15">/api</text>
+
+    <!-- Backend API -> PostgreSQL -->
+    <path d="M 580,265 L 640,265" fill="none" stroke="#c084fc" stroke-width="2" marker-end="url(#arrowPurple)"/>
+    <text x="590" y="255" class="conn-label" fill="#c084fc">TCP:5432</text>
+
+    <!-- DB -> Persistent Volume -->
+    <path d="M 730,350 L 730,410" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- ==================== EXTERNAL CONNECTIONS ==================== -->
+  <!-- Visiteur -> Front Visiteurs -->
+  <path d="M 230,195 L 330,195" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowCyan)"/>
+  
+  <!-- Admin -> Front Admin -->
+  <path d="M 230,435 L 330,435" fill="none" stroke="#facc15" stroke-width="2" marker-end="url(#arrowYellow)"/>
+
+</svg>

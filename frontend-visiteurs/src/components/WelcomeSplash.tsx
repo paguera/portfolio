@@ -137,7 +137,7 @@ export function WelcomeSplash({ onComplete }: WelcomeSplashProps) {
               GABRIEL FORTIER
             </span>
             <p className="text-xs text-slate-400 font-medium tracking-widest uppercase">
-              Développement Full-Stack · Audio · Art
+              Développement Full-Stack · DevOps · Lab Créatif
             </p>
           </motion.div>
 

@@ -7,6 +7,7 @@ import Liens from "./pages/Liens";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import Productions from "./pages/Productions";
+import Artwork from "./pages/Artwork";
 import { WelcomeSplash } from "./components/WelcomeSplash";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="artwork" element={<Artwork />} />
             <Route path="music" element={<Productions />} />
             <Route path="category/:slug" element={<CategoryProjects />} />
             <Route path="liens" element={<Liens />} />

@@ -32,6 +32,7 @@
     "dev": "tsx watch src/server.ts --trace-deprecation",
     "build": "tsc",
     "start": "node dist/src/server.js",
-    "create-admin": "node dist/scripts/create-admin.js"
+    "create-admin": "node dist/scripts/create-admin.js",
+    "seed-devops": "tsx scripts/seed-devops.ts"
   }
 }
