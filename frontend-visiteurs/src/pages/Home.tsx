@@ -108,7 +108,7 @@ const Home: React.FC = () => {
                 <strong className="text-white">La curiosité & la veille constante :</strong> Le monde du développement évolue vite. Explorer de nouveaux paradigmes, tester des outils d'observabilité et optimiser le tooling quotidien font partie intégrante de ma routine.
               </p>
               <p>
-                <strong className="text-white">Le sens du détail :</strong> Qu'il s'agisse d'une interface réactive au milliseconde près ou d'un Dockerfile optimisé en multi-stage, chaque détail compte.
+                <strong className="text-white">Le sens du détail :</strong> Qu'il s'agisse d'une interface réactive à la milliseconde près ou d'un Dockerfile optimisé en multi-stage, chaque détail compte.
               </p>
             </div>
           </div>
