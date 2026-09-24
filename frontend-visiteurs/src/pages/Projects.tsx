@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
-import { Helmet } from 'react-helmet-async';
-import type { Project } from "../types";
+import { Helmet } from "react-helmet-async";
+import type { Project, Category } from "../types";
 import { apiFetch } from "../utils/api";
 
 const getLinkBadge = (label: string): { tag: string; colorClass: string } => {
@@ -24,19 +23,23 @@ const getLinkBadge = (label: string): { tag: string; colorClass: string } => {
   return { tag: "[link]", colorClass: "text-gray-300 border-gray-400/50" };
 };
 
-const CategoryProjects: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const [articles, setArticles] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+const Projects: React.FC = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [loading, setLoading] = useState<boolean>(true);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string } | null>(null);
 
   useEffect(() => {
-    const loadArticles = async () => {
-      if (!slug) return;
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const data: Project[] = await apiFetch<Project[]>(`/projects/category/${slug}`);
-        setArticles(data);
+        const [projectsData, categoriesData] = await Promise.all([
+          apiFetch<Project[]>("/projects"),
+          apiFetch<Category[]>("/categories")
+        ]);
+        setProjects(projectsData || []);
+        setCategories(categoriesData || []);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Erreur inconnue";
         console.error("Erreur lors du chargement des projets :", message, error);
@@ -44,8 +47,8 @@ const CategoryProjects: React.FC = () => {
         setLoading(false);
       }
     };
-    loadArticles();
-  }, [slug]);
+    fetchData();
+  }, []);
 
   // Fermer la lightbox avec la touche Échap
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -67,45 +70,92 @@ const CategoryProjects: React.FC = () => {
     };
   }, [lightboxImage, handleKeyDown]);
 
-  if (loading)
+  // Ne conserver que les catégories Dev (exclure DevOps qui a sa page dédiée)
+  const devCategories = categories.filter(
+    (c) => c.name.toLowerCase() !== "devops"
+  );
+
+  // Projets Dev uniquement (hors devops)
+  const devProjects = projects.filter(
+    (p) => p.category_name?.toLowerCase() !== "devops"
+  );
+
+  const filteredProjects = devProjects.filter((project) => {
+    if (activeFilter === "all") return true;
+    return project.category_name?.toLowerCase() === activeFilter.toLowerCase();
+  });
+
+  if (loading) {
     return (
       <div className="text-center py-20 uppercase tracking-widest animate-pulse font-mono text-cyber-yellow">
-        [ Scanning database for {slug}... ]
+        [ Scanning projects database... ]
       </div>
     );
-
-  const isDevopsCategory = slug?.toLowerCase() === "devops";
+  }
 
   return (
     <div className="space-y-8">
       <Helmet>
-        <title>{`${slug?.toUpperCase()} | GVF Portfolio`}</title>
+        <title>Projets Dev | Gabriel Fortier</title>
         <meta
           name="description"
-          content={`Découvrez mes projets et architectures dans la catégorie ${slug}.`}
+          content="Découvrez mes projets en développement web, jeux, outils et architectures logicielles."
         />
       </Helmet>
 
-      {/* Category Header */}
+      {/* Header */}
       <div className="border-b-2 border-border-subtle pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <span className="text-xs font-mono uppercase tracking-widest text-cyber-yellow block mb-1">
-            Catégorie de projets
+            Galerie Portfolio
           </span>
           <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white">
-            {isDevopsCategory ? "DevOps & Infrastructure" : slug}
+            Projets Dev
           </h1>
         </div>
-        {isDevopsCategory && (
-          <p className="text-xs font-mono text-gray-400 max-w-md">
-            Architectures conteneurisées, pipelines CI/CD, automatisation et monitoring.
-          </p>
-        )}
+        <p className="text-xs font-mono text-gray-400 max-w-md">
+          Applications web full-stack, jeux, outils & architectures logicielles.
+        </p>
+      </div>
+
+      {/* Category Filter Tabs */}
+      <div className="flex flex-wrap gap-2 items-center pb-2">
+        <button
+          onClick={() => setActiveFilter("all")}
+          className={`px-4 py-2 font-mono text-xs uppercase tracking-wider font-bold transition-all border cursor-pointer ${
+            activeFilter === "all"
+              ? "bg-cyber-yellow text-black border-cyber-yellow shadow-[3px_3px_0px_0px_rgba(255,255,255,0.2)]"
+              : "bg-bg-panel text-gray-300 border-border-subtle hover:border-cyber-yellow hover:text-white"
+          }`}
+        >
+          [ Tous ({devProjects.length}) ]
+        </button>
+
+        {devCategories.map((cat) => {
+          const count = devProjects.filter(
+            (p) => p.category_name?.toLowerCase() === cat.name.toLowerCase()
+          ).length;
+          const isActive = activeFilter.toLowerCase() === cat.name.toLowerCase();
+
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setActiveFilter(cat.name.toLowerCase())}
+              className={`px-4 py-2 font-mono text-xs uppercase tracking-wider font-bold transition-all border cursor-pointer ${
+                isActive
+                  ? "bg-cyber-yellow text-black border-cyber-yellow shadow-[3px_3px_0px_0px_rgba(255,255,255,0.2)]"
+                  : "bg-bg-panel text-gray-300 border-border-subtle hover:border-cyber-yellow hover:text-white"
+              }`}
+            >
+              {cat.name} ({count})
+            </button>
+          );
+        })}
       </div>
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
-        {articles.map((article) => {
+        {filteredProjects.map((article) => {
           return (
             <article
               key={article.id}
@@ -131,6 +181,12 @@ const CategoryProjects: React.FC = () => {
                     decoding="async"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
                   />
+                  {/* Category Pill Tag */}
+                  {article.category_name && (
+                    <div className="absolute top-2 left-2 bg-black/85 backdrop-blur-sm border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-cyber-yellow uppercase font-bold">
+                      {article.category_name}
+                    </div>
+                  )}
                   {/* Badge d'agrandissement au survol */}
                   <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm border border-white/20 px-2 py-1 rounded text-[10px] font-mono text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 pointer-events-none">
                     <span>🔍</span>
@@ -220,16 +276,11 @@ const CategoryProjects: React.FC = () => {
           );
         })}
 
-        {articles.length === 0 && (
+        {filteredProjects.length === 0 && (
           <div className="col-span-full text-center py-20 border-2 border-dashed border-border-subtle rounded-xl p-8 space-y-4">
             <p className="font-mono text-sm text-gray-400 uppercase tracking-widest">
-              404_PROJECTS_NOT_FOUND: no entries for category "{slug}"
+              404_PROJECTS_NOT_FOUND: no entries for current selection
             </p>
-            {isDevopsCategory && (
-              <p className="text-xs text-text-muted font-sans max-w-md mx-auto">
-                Les projets d'infrastructure et d'automatisation sont en cours d'intégration.
-              </p>
-            )}
           </div>
         )}
       </div>
@@ -276,4 +327,4 @@ const CategoryProjects: React.FC = () => {
   );
 };
 
-export default CategoryProjects;
+export default Projects;

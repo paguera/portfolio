@@ -1,44 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
-import { apiFetch } from "../utils/api";
-
-interface Category {
-  id: number;
-  name: string;
-}
 
 const Navbar: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isDevDropdownOpen, setIsDevDropdownOpen] = useState(false);
   const [isCreativeDropdownOpen, setIsCreativeDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const devDropdownRef = useRef<HTMLLIElement>(null);
   const creativeDropdownRef = useRef<HTMLLIElement>(null);
   const location = useLocation();
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await apiFetch<Category[]>("/categories");
-        setCategories(data);
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  // Ferme les dropdowns au clic à l'extérieur
+  // Ferme le dropdown au clic à l'extérieur
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (
-        devDropdownRef.current &&
-        !devDropdownRef.current.contains(target)
-      ) {
-        setIsDevDropdownOpen(false);
-      }
       if (
         creativeDropdownRef.current &&
         !creativeDropdownRef.current.contains(target)
@@ -55,7 +28,6 @@ const Navbar: React.FC = () => {
 
   // Fermer les dropdowns quand l'URL change
   useEffect(() => {
-    setIsDevDropdownOpen(false);
     setIsCreativeDropdownOpen(false);
     setIsMenuOpen(false);
   }, [location.pathname]);
@@ -65,13 +37,12 @@ const Navbar: React.FC = () => {
       isActive ? "text-cyber-yellow underline decoration-2 underline-offset-8" : "text-white"
     }`;
 
+  const isDevActive =
+    location.pathname === "/projects" ||
+    (location.pathname.startsWith("/category/") && !location.pathname.includes("devops"));
+
   const isCreativeActive =
     location.pathname === "/artwork" || location.pathname === "/music";
-
-  // Filtrer les catégories dev (ignorer devops si présent dans la liste brute car il a son propre onglet)
-  const devCategories = categories.filter(
-    (c) => c.name.toLowerCase() !== "devops"
-  );
 
   return (
     <>
@@ -121,55 +92,21 @@ const Navbar: React.FC = () => {
             </NavLink>
           </li>
 
-          {/* DÉVELOPPEMENT Dropdown */}
-          <li
-            ref={devDropdownRef}
-            className="relative w-full md:w-auto flex flex-col items-center md:block"
-          >
-            <button
-              className={`hover:text-cyber-yellow flex items-center gap-1 transition-colors w-full md:w-auto justify-center md:justify-start font-black uppercase cursor-pointer select-none ${
-                location.pathname.startsWith("/category/") && !location.pathname.includes("devops")
-                  ? "text-cyber-yellow"
-                  : "text-white"
-              }`}
-              onClick={() => {
-                setIsDevDropdownOpen(!isDevDropdownOpen);
-                setIsCreativeDropdownOpen(false);
-              }}
-              aria-haspopup="true"
-              aria-expanded={isDevDropdownOpen}
+          {/* DÉVELOPPEMENT (Lien direct vers /projects) */}
+          <li>
+            <NavLink
+              to="/projects"
+              className={({ isActive }) =>
+                `hover:text-cyber-yellow transition-colors w-full md:w-auto text-center ${
+                  isActive || isDevActive
+                    ? "text-cyber-yellow underline decoration-2 underline-offset-8"
+                    : "text-white"
+                }`
+              }
+              onClick={() => setIsMenuOpen(false)}
             >
-              DEV {isDevDropdownOpen ? "↑" : "↓"}
-            </button>
-
-            {isDevDropdownOpen && (
-              <ul className="md:absolute md:left-0 mt-4 md:mt-2 w-full md:w-56 bg-[#0d1527]/95 backdrop-blur-xl text-white border border-white/20 rounded-xl shadow-2xl py-2 z-50 flex flex-col list-none overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                {devCategories.length > 0 ? (
-                  devCategories.map((cat) => (
-                    <li key={cat.id}>
-                      <NavLink
-                        to={`/category/${cat.name.toLowerCase()}`}
-                        className={({ isActive }) =>
-                          `block px-6 py-3.5 md:px-4 md:py-2.5 hover:bg-white/10 hover:text-cyber-yellow transition-colors text-center md:text-left border-b border-white/5 last:border-0 font-bold ${
-                            isActive ? "bg-white/15 text-cyber-yellow font-black" : "text-gray-200"
-                          }`
-                        }
-                        onClick={() => {
-                          setIsDevDropdownOpen(false);
-                          setIsMenuOpen(false);
-                        }}
-                      >
-                        {cat.name}
-                      </NavLink>
-                    </li>
-                  ))
-                ) : (
-                  <li className="px-4 py-3 text-xs italic opacity-60 text-center">
-                    Aucune catégorie
-                  </li>
-                )}
-              </ul>
-            )}
+              DEV
+            </NavLink>
           </li>
 
           {/* DEVOPS */}
@@ -194,7 +131,6 @@ const Navbar: React.FC = () => {
               }`}
               onClick={() => {
                 setIsCreativeDropdownOpen(!isCreativeDropdownOpen);
-                setIsDevDropdownOpen(false);
               }}
               aria-haspopup="true"
               aria-expanded={isCreativeDropdownOpen}
@@ -203,7 +139,7 @@ const Navbar: React.FC = () => {
             </button>
 
             {isCreativeDropdownOpen && (
-              <ul className="md:absolute md:right-0 mt-4 md:mt-2 w-full md:w-60 bg-[#0d1527]/95 backdrop-blur-xl text-white border border-white/20 rounded-xl shadow-2xl py-2 z-50 flex flex-col list-none overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <ul className="md:absolute md:right-0 mt-4 md:mt-2 w-full md:w-60 bg-[#1f2128]/95 backdrop-blur-xl text-white border border-white/20 rounded-xl shadow-2xl py-2 z-50 flex flex-col list-none overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 <li>
                   <NavLink
                     to="/artwork"
@@ -217,7 +153,6 @@ const Navbar: React.FC = () => {
                       setIsMenuOpen(false);
                     }}
                   >
-                    <span>🎨</span>
                     <span>Galerie d'Art</span>
                   </NavLink>
                 </li>
@@ -234,8 +169,7 @@ const Navbar: React.FC = () => {
                       setIsMenuOpen(false);
                     }}
                   >
-                    <span>🎵</span>
-                    <span>Musique (Soundwave)</span>
+                    <span>Musique</span>
                   </NavLink>
                 </li>
               </ul>

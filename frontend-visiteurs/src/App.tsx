@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import CategoryProjects from "./pages/CategoryProjects";
+import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import Liens from "./pages/Liens";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="artwork" element={<Artwork />} />
             <Route path="music" element={<Productions />} />
+            <Route path="projects" element={<Projects />} />
             <Route path="category/:slug" element={<CategoryProjects />} />
             <Route path="liens" element={<Liens />} />
             <Route path="contact" element={<Contact />} />

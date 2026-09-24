@@ -1,32 +1,32 @@
 :root {
   --cyber-yellow: #fbbf24;
-  --cyber-cyan: #0f0a0f;
+  --cyber-cyan: #191b22;
   --cyber-purple: #8b5cf6;
   --cyber-blue: #2faee0;
   --black: #000000;
   --white: #ffffff;
-  --dark-blue-gray: #0d1527;
-  --medium-blue-gray: #162235;
+  --dark-slate-gray: #1f2128;
+  --medium-slate-gray: #2e323e;
   --light-gray: #9ca3af;
 
   /* Theme mappings aligned with CV colors */
   --color-primary: var(--cyber-cyan);
   --color-secondary: var(--cyber-blue);
-  --color-bg-main: #0d1527;
-  --color-bg-panel: var(--cyber-cyan);
+  --color-bg-main: #1f2128;
+  --color-bg-panel: #252831;
   --color-text-main: var(--white);
   --color-text-muted: var(--light-gray);
-  --color-border-subtle: var(--medium-blue-gray);
+  --color-border-subtle: var(--medium-slate-gray);
 
   /* Soundwave Visualizer Tokens */
-  --bg-dark: #07080e;
-  --bg-card: rgba(16, 18, 27, 0.65);
+  --bg-dark: #181a20;
+  --bg-card: rgba(37, 40, 49, 0.65);
   --bg-card-hover: rgba(255, 255, 255, 0.05);
-  --border-color: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.08);
   --border-glow: rgba(168, 85, 247, 0.2);
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
-  --text-muted: #475569;
+  --text-muted: #64748b;
 
   --neon-purple: #a855f7;
   --neon-cyan: #06b6d4;

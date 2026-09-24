@@ -37,7 +37,7 @@ const Home: React.FC = () => {
             {/* CTA BUTTONS */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
               <Link
-                to="/category/fullstack"
+                to="/projects"
                 className="px-6 py-3 bg-cyber-yellow text-black font-black uppercase text-xs tracking-widest hover:bg-yellow-300 transition-all shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
               >
                 Explorer mes projets Dev
@@ -80,7 +80,7 @@ const Home: React.FC = () => {
           <div className="bg-bg-panel/40 border border-border-subtle p-8 rounded-xl space-y-4 relative overflow-hidden">
             <div className="w-1.5 h-8 bg-cyber-yellow absolute top-8 left-0"></div>
             <h2 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-3">
-              <span>🚀</span> Mon Parcours
+              Mon Parcours
             </h2>
             <div className="text-sm font-sans text-text-muted leading-relaxed space-y-3">
               <p>
@@ -98,7 +98,7 @@ const Home: React.FC = () => {
           <div className="bg-bg-panel/40 border border-border-subtle p-8 rounded-xl space-y-4 relative overflow-hidden">
             <div className="w-1.5 h-8 bg-cyber-blue absolute top-8 left-0"></div>
             <h2 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-3">
-              <span>🎯</span> Ce qui m'anime
+              Ce qui m'anime
             </h2>
             <div className="text-sm font-sans text-text-muted leading-relaxed space-y-3">
               <p>
@@ -187,7 +187,7 @@ const Home: React.FC = () => {
                   <span className="text-purple-400">▹</span> Docker & Docker Compose
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-purple-400">▹</span> Linux (Debian / Ubuntu / CLI)
+                  <span className="text-purple-400">▹</span> Linux (Debian / Alma / Arch)
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-purple-400">▹</span> CI/CD GitHub Actions & Déploiement
@@ -201,11 +201,11 @@ const Home: React.FC = () => {
         </section>
 
         {/* LAB CRÉATIF BANNER */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-[#0d1527] via-[#161a29] to-[#0d1527] border-2 border-dashed border-white/20 p-8 md:p-10 rounded-2xl">
+        <section className="relative overflow-hidden bg-linear-to-r from-[#1f2128] via-[#282b35] to-[#1f2128] border-2 border-dashed border-white/20 p-8 md:p-10 rounded-2xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 text-center md:text-left">
               <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-cyber-yellow">
-                <span>🎨 🎵</span> Univers & Passions
+                Univers & Passions
               </div>
               <h3 className="text-2xl md:text-3xl font-black uppercase text-white tracking-tight">
                 Curieux d'en voir plus ? Découvrez le Lab Créatif
@@ -226,7 +226,7 @@ const Home: React.FC = () => {
                 to="/music"
                 className="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs uppercase tracking-wider rounded transition-all"
               >
-                Soundwave Audio
+                Créations sonores
               </Link>
             </div>
           </div>

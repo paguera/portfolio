@@ -34,8 +34,8 @@
 
 body {
     @apply bg-bg-main text-text-main;
-    background-image: url("/temple1.svg"), radial-gradient(circle at top right, #0d1527, #080b11 60%);
-    background-size: 3%, auto;
+    background-image: url("/temple1.svg"), radial-gradient(circle at top right, #2b2e38, #181a20 60%);
+    background-size: 7%, auto;
     background-attachment: scroll, fixed;
 }
 
