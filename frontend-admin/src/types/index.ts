@@ -35,3 +35,49 @@ export interface Project {
 export interface AuthResponse {
   token: string
 }
+
+export interface VisitorStatsSummary {
+  totalUniqueVisitors: number
+  totalPageViews: number
+  todayVisitors: number
+  weekVisitors: number
+  monthVisitors: number
+}
+
+export interface VisitorDailyHistory {
+  date: string
+  uniqueVisitors: number
+  pageViews: number
+}
+
+export interface VisitorTopPage {
+  path: string
+  views: number
+}
+
+export interface VisitorBreakdownItem {
+  name: string
+  count: number
+  percentage: number
+}
+
+export interface RecentVisitItem {
+  id: number
+  visitorUuid: string
+  path: string
+  browser: string
+  os: string
+  device: string
+  referrer: string | null
+  createdAt: string
+}
+
+export interface VisitorAdvancedStats {
+  summary: VisitorStatsSummary
+  history: VisitorDailyHistory[]
+  topPages: VisitorTopPage[]
+  devices: VisitorBreakdownItem[]
+  browsers: VisitorBreakdownItem[]
+  operatingSystems: VisitorBreakdownItem[]
+  recentVisits: RecentVisitItem[]
+}

@@ -1,9 +1,10 @@
-// src/pages/Admin.tsx (1-200)
 import React, { useEffect, useState } from 'react'
 import type { Project, Category, Technology } from '../types'
 import apiFetch from '../utils/api'
+import VisitorAnalytics from '../components/VisitorAnalytics'
 
 const Admin: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'analytics' | 'projects'>('analytics')
   const [projects, setProjects] = useState<Project[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [technologies, setTechnologies] = useState<Technology[]>([])
@@ -128,6 +129,7 @@ const Admin: React.FC = () => {
   }
 
   const handleEditProject = (project: Project) => {
+    setActiveTab('projects')
     setEditingProjectId(project.id)
     setTitle(project.title)
     setDescription(project.description || '')
@@ -207,11 +209,48 @@ const Admin: React.FC = () => {
 
   return (
     <div className='flex flex-col gap-16 pb-20 text-text-main'>
-      <h1 className='text-5xl font-black uppercase tracking-tighter'>
-        Admin_Dashboard.sys
-      </h1>
+      <div className='flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b-2 border-border-subtle pb-6'>
+        <div>
+          <h1 className='text-4xl md:text-5xl font-black uppercase tracking-tighter'>
+            Admin_Dashboard.sys
+          </h1>
+          <p className='text-xs font-mono text-text-muted mt-2'>
+            Session administrateur sécurisée via Tailscale [100.80.76.84]
+          </p>
+        </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-12'>
+        {/* Tab Switcher */}
+        <div className='flex gap-2 bg-bg-panel border border-border-subtle p-1 font-mono text-xs font-bold uppercase'>
+          <button
+            type='button'
+            onClick={() => setActiveTab('analytics')}
+            className={`px-4 py-2.5 transition-all cursor-pointer ${
+              activeTab === 'analytics'
+                ? 'bg-secondary text-bg-main font-black shadow'
+                : 'text-text-muted hover:text-white'
+            }`}
+          >
+            [ 📊 MÉTRIQUES &amp; TRAFIC ]
+          </button>
+          <button
+            type='button'
+            onClick={() => setActiveTab('projects')}
+            className={`px-4 py-2.5 transition-all cursor-pointer ${
+              activeTab === 'projects'
+                ? 'bg-primary text-bg-main font-black shadow'
+                : 'text-text-muted hover:text-white'
+            }`}
+          >
+            [ ⚙ GESTION DU CONTENU ]
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'analytics' && <VisitorAnalytics />}
+
+      {activeTab === 'projects' && (
+        <div className='flex flex-col gap-16'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-12'>
         {/* Project Form Section */}
         <section className='lg:col-span-2'>
           <div className='bg-bg-panel border-2 border-border-subtle p-8 shadow-2xl'>
@@ -553,6 +592,8 @@ const Admin: React.FC = () => {
           </table>
         </div>
       </section>
+        </div>
+      )}
     </div>
   )
 }

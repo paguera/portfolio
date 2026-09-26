@@ -122,3 +122,30 @@ EXECUTE FUNCTION trigger_set_timestamp();
 -- Les index accélèrent les recherches (SELECT) sur ces colonnes.
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_projects_category ON projects(category_id);
+
+-- -----------------------------------------------------------------------------
+-- 10. TABLES DES MÉTRIQUES ET VISITEURS
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS visitors (
+    id SERIAL PRIMARY KEY,
+    visitor_uuid VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    last_visit_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    total_visits INT DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS page_views (
+    id SERIAL PRIMARY KEY,
+    visitor_uuid VARCHAR(255) NOT NULL,
+    path VARCHAR(255) NOT NULL DEFAULT '/',
+    referrer VARCHAR(500),
+    browser VARCHAR(50),
+    os VARCHAR(50),
+    device VARCHAR(50),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at);
+CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views (path);
+CREATE INDEX IF NOT EXISTS idx_page_views_visitor ON page_views (visitor_uuid);
+

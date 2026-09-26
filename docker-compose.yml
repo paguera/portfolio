@@ -71,9 +71,10 @@ services:
     environment:
       - VITE_BASE_URL=${VITE_BASE_URL_ADMIN}
     networks:
-      - nas-net
+      - portfolio-admin-net
     ports:
-      - "8080:80"
+      # Lie le frontadmin STRICTEMENT a l'IP Tailscale (tailscale0)
+      - "${TAILSCALE_IP:-100.80.76.84}:8080:80"
 
 volumes:
   portfolio-db-data:
@@ -81,3 +82,5 @@ volumes:
 networks:
   nas-net:
     external: true
+  portfolio-admin-net:
+    driver: bridge

@@ -151,7 +151,7 @@ Cette commande orchestre les 4 conteneurs :
 - **`portfolio-db`** : Base PostgreSQL 15 (volume persistant `portfolio-db-data` et initialisation SQL automatique).
 - **`portfolio-backend`** : API Node.js/Express 5 TypeScript multi-stage.
 - **`portfolio-visiteurs`** : Frontend public sous Nginx avec volume monté pour les fichiers audio.
-- **`portfolio-admin`** : Dashboard d'administration sous Nginx (exposé sur le port `8080`).
+- **`portfolio-admin`** : Dashboard d'administration sous Nginx isolé sur son propre réseau et strictement exposé sur l'interface Tailscale (`${TAILSCALE_IP}:8080`), inaccessible depuis `nas-net` ou le réseau local.
 
 ### 3. Build manuel individuel (optionnel)
 
