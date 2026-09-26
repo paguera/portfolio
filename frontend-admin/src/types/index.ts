@@ -39,6 +39,7 @@ export interface AuthResponse {
 export interface VisitorStatsSummary {
   totalUniqueVisitors: number
   totalPageViews: number
+  totalAudioPlays: number
   todayVisitors: number
   weekVisitors: number
   monthVisitors: number
@@ -48,11 +49,32 @@ export interface VisitorDailyHistory {
   date: string
   uniqueVisitors: number
   pageViews: number
+  audioPlays: number
 }
 
 export interface VisitorTopPage {
   path: string
   views: number
+  percentage: number
+}
+
+export interface TopAudioTrack {
+  title: string
+  artist: string
+  playlist: string
+  plays: number
+  percentage: number
+  lastPlayedAt: string
+}
+
+export interface RecentAudioPlayItem {
+  id: number
+  visitorUuid: string
+  ip: string
+  title: string
+  artist: string
+  playlist: string
+  createdAt: string
 }
 
 export interface VisitorBreakdownItem {
@@ -64,6 +86,7 @@ export interface VisitorBreakdownItem {
 export interface RecentVisitItem {
   id: number
   visitorUuid: string
+  ip: string
   path: string
   browser: string
   os: string
@@ -76,6 +99,8 @@ export interface VisitorAdvancedStats {
   summary: VisitorStatsSummary
   history: VisitorDailyHistory[]
   topPages: VisitorTopPage[]
+  topTracks: TopAudioTrack[]
+  recentAudioPlays: RecentAudioPlayItem[]
   devices: VisitorBreakdownItem[]
   browsers: VisitorBreakdownItem[]
   operatingSystems: VisitorBreakdownItem[]

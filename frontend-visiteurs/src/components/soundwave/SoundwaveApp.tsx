@@ -1,32 +1,59 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import UnifiedVisualizer from "./UnifiedVisualizer";
 import Playlist from "./Playlist";
 import { tracks as defaultTracks } from "./tracks";
 import { useAudioAnalyser } from "./useAudioAnalyser";
-import type { Track } from "./types";
+import type { Track, PlaylistInfo } from "./types";
+import { apiFetch } from "../../utils/api";
 import "./soundwave.css";
 
 const SoundwaveApp: React.FC = () => {
   const [tracks, setTracks] = useState<Track[]>(defaultTracks);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<string>("all");
   const [strobeThreshold, setStrobeThreshold] = useState<number>(0.58);
 
   // Custom audio player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.8);
+  const [volume, setVolume] = useState(0.85);
   const [isMuted, setIsMuted] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
+
+  // Mobile & Visualizer visibility state
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+
+  const [showVisualizer, setShowVisualizer] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth >= 768;
+    }
+    return false;
+  });
 
   // Fullscreen state & ref
   const [isFullscreen, setIsFullscreen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Référence vers l'élément audio HTML et initialisation des analyseurs (principal, canal gauche, canal droit)
+  // Audio HTML element & analyser setup
   const audioRef = useRef<HTMLAudioElement>(null);
   const { analyser, analyserL, analyserR, initAudio, resumeAudio } = useAudioAnalyser(audioRef);
+
+  // Detect screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Sync fullscreen change state
   useEffect(() => {
@@ -53,9 +80,53 @@ const SoundwaveApp: React.FC = () => {
     }
   };
 
-  // Load tracks dynamically from /audio/ directory listing if available
+  // Helper for cyber gradients (yellow, amber, purple, gold, coral)
+  const getCyberGradientForString = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const colorCombos = [
+      "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)", // Cyber Yellow to Amber
+      "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)", // Cyber Purple to Violet
+      "linear-gradient(135deg, #f59e0b 0%, #b45309 100%)", // Warm Amber
+      "linear-gradient(135deg, #ec4899 0%, #be185d 100%)", // Coral Pink
+      "linear-gradient(135deg, #c39c6b 0%, #78350f 100%)", // Warm Gold
+      "linear-gradient(135deg, #facc15 0%, #ca8a04 100%)", // Neon Yellow
+      "linear-gradient(135deg, #fb923c 0%, #ea580c 100%)", // Cyber Orange
+      "linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)", // Bright Violet
+    ];
+    const index = Math.abs(hash) % colorCombos.length;
+    return colorCombos[index];
+  };
+
+  // Format filename into clean artist and title
+  const parseFilename = (filename: string, fallbackFolder: string) => {
+    const cleanName = filename.replace(/\.[^/.]+$/, "");
+    // Check for [Genre] Prefix
+    let genre = fallbackFolder;
+    let nameWithoutTag = cleanName;
+    const tagMatch = cleanName.match(/^\[(.*?)\]\s*(.*)$/);
+    if (tagMatch) {
+      genre = tagMatch[1].trim();
+      nameWithoutTag = tagMatch[2].trim();
+    }
+
+    const parts = nameWithoutTag.split(" - ");
+    let artist = "Paguera";
+    let title = nameWithoutTag;
+
+    if (parts.length > 1) {
+      artist = parts[0].trim();
+      title = parts.slice(1).join(" - ").trim();
+    }
+
+    return { title, artist, genre };
+  };
+
+  // Load tracks dynamically from /audio/ directory listing & subdirectories
   useEffect(() => {
-    const fetchTracks = async () => {
+    const fetchDynamicAudio = async () => {
       try {
         const response = await fetch("/audio/");
         if (!response.ok) {
@@ -64,56 +135,101 @@ const SoundwaveApp: React.FC = () => {
 
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
-          const files = await response.json();
-          if (Array.isArray(files)) {
+          const items = await response.json();
+          if (Array.isArray(items) && items.length > 0) {
             const audioExtensions = /\.(mp3|wav|ogg|flac|m4a|aac|webm)$/i;
-            const audioFiles = files.filter(file => file.name && audioExtensions.test(file.name));
+            const discoveredTracks: Track[] = [];
 
-            if (audioFiles.length > 0) {
-              const getGradientForString = (str: string) => {
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) {
-                  hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            // 1. Check root files and subdirectories
+            for (let i = 0; i < items.length; i++) {
+              const item = items[i];
+              const itemName = item.name;
+
+              // Check if item is a subdirectory (playlist)
+              const isDir = item.type === "directory" || (!audioExtensions.test(itemName) && !itemName.includes("."));
+
+              if (isDir) {
+                const folderName = itemName.replace(/\/$/, "");
+                try {
+                  const subResp = await fetch(`/audio/${encodeURIComponent(folderName)}/`);
+                  if (subResp.ok) {
+                    const subItems = await subResp.json();
+                    if (Array.isArray(subItems)) {
+                      const subAudioFiles = subItems.filter(f => f.name && audioExtensions.test(f.name));
+                      subAudioFiles.forEach((file, fIdx) => {
+                        const { title, artist, genre } = parseFilename(file.name, folderName);
+                        discoveredTracks.push({
+                          id: `folder-${folderName}-${fIdx}-${file.name}`,
+                          title,
+                          artist,
+                          album: folderName,
+                          duration: "Audio",
+                          url: `/audio/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`,
+                          coverGradient: getCyberGradientForString(file.name),
+                          playlist: genre || folderName
+                        });
+                      });
+                    }
+                  }
+                } catch (subErr) {
+                  console.warn(`Could not read subfolder ${folderName}:`, subErr);
                 }
-                const hue1 = Math.abs(hash % 360);
-                const hue2 = Math.abs((hash * 13) % 360);
-                return `linear-gradient(135deg, hsl(${hue1}, 70%, 55%) 0%, hsl(${hue2}, 70%, 45%) 100%)`;
-              };
-
-              const parsedTracks: Track[] = audioFiles.map((file, index) => {
-                const filename = file.name;
-                const cleanName = filename.replace(/\.[^/.]+$/, "");
-                const parts = cleanName.split(" - ");
-                let artist = "Unknown Artist";
-                let title = cleanName;
-
-                if (parts.length > 1) {
-                  artist = parts[0].trim();
-                  title = parts.slice(1).join(" - ").trim();
-                }
-
-                return {
-                  id: `dynamic-${index}-${filename}`,
+              } else if (audioExtensions.test(itemName)) {
+                // Root audio file
+                const { title, artist, genre } = parseFilename(itemName, "Général");
+                discoveredTracks.push({
+                  id: `root-${i}-${itemName}`,
                   title,
                   artist,
-                  album: "Audio Folder",
+                  album: "Général",
                   duration: "Audio",
-                  url: `/audio/${encodeURIComponent(filename)}`,
-                  coverGradient: getGradientForString(filename)
-                };
-              });
+                  url: `/audio/${encodeURIComponent(itemName)}`,
+                  coverGradient: getCyberGradientForString(itemName),
+                  playlist: genre || "Général"
+                });
+              }
+            }
 
-              setTracks(parsedTracks);
+            if (discoveredTracks.length > 0) {
+              setTracks(discoveredTracks);
             }
           }
         }
       } catch (err) {
-        console.warn("Using fallback audio tracks:", err);
+        console.warn("Using fallback curated audio playlist:", err);
       }
     };
 
-    fetchTracks();
+    fetchDynamicAudio();
   }, []);
+
+  // Compute playlists/genres list with track count
+  const playlists: PlaylistInfo[] = useMemo(() => {
+    const counts: Record<string, number> = {};
+    tracks.forEach((t) => {
+      const name = t.playlist || "Général";
+      counts[name] = (counts[name] || 0) + 1;
+    });
+
+    const list: PlaylistInfo[] = Object.entries(counts).map(([name, count]) => ({
+      id: name,
+      name,
+      count
+    }));
+
+    return [
+      { id: "all", name: "Tous les titres", count: tracks.length },
+      ...list
+    ];
+  }, [tracks]);
+
+  // Current active playlist track subset for Next/Prev navigation
+  const activePlaylistTracks = useMemo(() => {
+    if (selectedPlaylist === "all") return tracks;
+    return tracks.filter(
+      (t) => (t.playlist || "Général").toLowerCase() === selectedPlaylist.toLowerCase()
+    );
+  }, [tracks, selectedPlaylist]);
 
   const formatTime = (secs: number) => {
     if (isNaN(secs)) return "0:00";
@@ -122,8 +238,38 @@ const SoundwaveApp: React.FC = () => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
+  const lastTrackedTrackIdRef = useRef<string | null>(null);
+
+  const trackAudioPlay = useCallback(async (track: Track) => {
+    if (!track || lastTrackedTrackIdRef.current === track.id) return;
+    lastTrackedTrackIdRef.current = track.id;
+
+    try {
+      let visitorUuid = localStorage.getItem("paguera_visitor_id");
+      if (!visitorUuid) {
+        visitorUuid = crypto.randomUUID();
+        localStorage.setItem("paguera_visitor_id", visitorUuid);
+      }
+
+      await apiFetch("/visitors/track-audio", {
+        method: "POST",
+        body: JSON.stringify({
+          visitorUuid,
+          trackId: track.id,
+          trackTitle: track.title,
+          trackArtist: track.artist,
+          playlist: track.playlist || "Général",
+        }),
+      });
+    } catch (err) {
+      // Non-blocking telemetry
+      console.debug("Audio play tracking err:", err);
+    }
+  }, []);
+
   const handleTrackSelect = useCallback((track: Track) => {
     setCurrentTrack(track);
+    trackAudioPlay(track);
     if (audioRef.current) {
       audioRef.current.src = track.url;
       initAudio();
@@ -132,30 +278,32 @@ const SoundwaveApp: React.FC = () => {
         console.log("Playback blocked or interrupted: ", err);
       });
     }
-  }, [initAudio, resumeAudio]);
+  }, [initAudio, resumeAudio, trackAudioPlay]);
 
   const handleNext = useCallback(() => {
-    if (tracks.length === 0) return;
+    const currentList = activePlaylistTracks.length > 0 ? activePlaylistTracks : tracks;
+    if (currentList.length === 0) return;
     let nextIndex = 0;
     if (isShuffle) {
-      nextIndex = Math.floor(Math.random() * tracks.length);
+      nextIndex = Math.floor(Math.random() * currentList.length);
     } else if (currentTrack) {
-      const currentIndex = tracks.findIndex((t) => t.id === currentTrack.id);
-      nextIndex = (currentIndex + 1) % tracks.length;
+      const currentIndex = currentList.findIndex((t) => t.id === currentTrack.id);
+      nextIndex = (currentIndex + 1) % currentList.length;
     }
-    handleTrackSelect(tracks[nextIndex]);
-  }, [tracks, isShuffle, currentTrack, handleTrackSelect]);
+    handleTrackSelect(currentList[nextIndex]);
+  }, [activePlaylistTracks, tracks, isShuffle, currentTrack, handleTrackSelect]);
 
   const handlePrev = useCallback(() => {
-    if (tracks.length === 0) return;
+    const currentList = activePlaylistTracks.length > 0 ? activePlaylistTracks : tracks;
+    if (currentList.length === 0) return;
     let prevIndex = 0;
     if (currentTrack) {
-      const currentIndex = tracks.findIndex((t) => t.id === currentTrack.id);
+      const currentIndex = currentList.findIndex((t) => t.id === currentTrack.id);
       prevIndex = currentIndex - 1;
-      if (prevIndex < 0) prevIndex = tracks.length - 1;
+      if (prevIndex < 0) prevIndex = currentList.length - 1;
     }
-    handleTrackSelect(tracks[prevIndex]);
-  }, [tracks, currentTrack, handleTrackSelect]);
+    handleTrackSelect(currentList[prevIndex]);
+  }, [activePlaylistTracks, tracks, currentTrack, handleTrackSelect]);
 
   // Sync state with audio element
   useEffect(() => {
@@ -202,8 +350,11 @@ const SoundwaveApp: React.FC = () => {
   }, [currentTrack, isRepeat, handleNext, volume, isMuted]);
 
   const handlePlayPause = () => {
-    if (!currentTrack && tracks.length > 0) {
-      handleTrackSelect(tracks[0]);
+    if (!currentTrack) {
+      const listToPlay = activePlaylistTracks.length > 0 ? activePlaylistTracks : tracks;
+      if (listToPlay.length > 0) {
+        handleTrackSelect(listToPlay[0]);
+      }
       return;
     }
 
@@ -252,115 +403,172 @@ const SoundwaveApp: React.FC = () => {
 
   return (
     <div className="soundwave-page-wrapper">
-      {/* Background glowing blurred radial orbs spanning full screen */}
+      {/* Background ambient glowing orbs (Yellow & Purple) */}
+      <div className="bg-glow glow-yellow"></div>
       <div className="bg-glow glow-purple"></div>
-      <div className="bg-glow glow-cyan"></div>
 
       <div className="soundwave-app">
-
-      <header className="app-header">
-        <div className="logo-section">
-          <div className="logo-waves">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <h1>Compositions originales</h1>
-        </div>
-        <p className="subtitle">
-          Bienvenue dans mon univers sonore : écoutez mes créations et explorez-les en direct avec le visualiseur interactif Soundwave.
-        </p>
-      </header>
-
-      <main className="main-content">
-        <section className="visualizer-section">
-          {/* Visualizer Selector Tabs */}
-          <div className="viz-tabs-container">
-            <div className="strobe-slider-panel">
-              <span className="strobe-slider-label">
-                [ STROBE_THRESHOLD: {Math.round(strobeThreshold * 100)}% ]
-              </span>
-              <input
-                type="range"
-                min="0.25"
-                max="1.00"
-                step="0.01"
-                value={strobeThreshold}
-                onChange={(e) => setStrobeThreshold(parseFloat(e.target.value))}
-                className="strobe-slider"
-              />
+        <header className="app-header">
+          <div className="logo-section">
+            <div className="logo-waves">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
+            <h1>Compositions sonores</h1>
           </div>
+          <p className="subtitle">
+            Lecteur audio & visualiseur interactif — Découvrez mes créations musicales classées par genres et playlists.
+          </p>
+        </header>
 
-          {/* Holographic Screen Viewport */}
-          <div className="canvas-wrapper" ref={wrapperRef}>
-            <div className="screen-glow"></div>
+        <main className="main-content">
+          {/* Visualizer / Mobile Hero Section */}
+          <section className="visualizer-section">
+            {/* Visualizer Toolbar */}
+            <div className="viz-toolbar">
+              <div className="viz-toggle-wrapper">
+                <button
+                  className={`viz-toggle-btn ${showVisualizer ? "active" : ""}`}
+                  onClick={() => setShowVisualizer(!showVisualizer)}
+                  title={showVisualizer ? "Masquer le visualiseur" : "Activer le visualiseur"}
+                >
+                  <span className="pulse-dot"></span>
+                  <span className="font-mono text-xs">
+                    {showVisualizer ? "[ VISUALISEUR: ACTIF ]" : "[ VISUALISEUR: MASQUÉ ]"}
+                  </span>
+                </button>
+              </div>
 
-            <span className="corner-tag tl"></span>
-            <span className="corner-tag tr"></span>
-            <span className="corner-tag bl"></span>
-            <span className="corner-tag br"></span>
-
-            <button
-              className="fullscreen-btn"
-              onClick={toggleFullscreen}
-              title={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
-            >
-              {isFullscreen ? (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 4v4H4M16 4v4h4M20 16h-4v4M4 16h4v4" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4" />
-                </svg>
-              )}
-            </button>
-
-            <div className="canvas-container">
-              <UnifiedVisualizer
-                analyser={analyser}
-                analyserL={analyserL}
-                analyserR={analyserR}
-                currentTrack={currentTrack}
-                strobeThreshold={strobeThreshold}
-              />
-
-              {!currentTrack && (
-                <div className="no-track-overlay">
-                  <div className="overlay-content">
-                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 0v1.5m0-1.5L9 12m10.5-6v10.5m-10.5-3L20 10.5M9 12v7.5m0-7.5l-6 3m6-3l6-3M3 15v4.5M3 15l6-3m-6 3h6m0 0v4.5" />
-                    </svg>
-                    <p>Sélectionnez une piste dans la playlist pour démarrer la visualisation</p>
-                  </div>
+              {showVisualizer && (
+                <div className="strobe-slider-panel">
+                  <span className="strobe-slider-label font-mono">
+                    STROBE: {Math.round(strobeThreshold * 100)}%
+                  </span>
+                  <input
+                    type="range"
+                    min="0.25"
+                    max="1.00"
+                    step="0.01"
+                    value={strobeThreshold}
+                    onChange={(e) => setStrobeThreshold(parseFloat(e.target.value))}
+                    className="strobe-slider"
+                    title="Seuil d'impact du stroboscope"
+                  />
                 </div>
               )}
             </div>
-          </div>
-        </section>
 
-        {/* Playlist Sidebar */}
-        <aside className="sidebar-section">
-          <Playlist
-            tracks={tracks}
-            currentTrack={currentTrack}
-            isPlaying={isPlaying}
-            onTrackSelect={handleTrackSelect}
-          />
-        </aside>
-      </main>
+            {/* Viewport: Canvas on Desktop or Mobile Hero Card when disabled */}
+            {showVisualizer ? (
+              <div className="canvas-wrapper" ref={wrapperRef}>
+                <div className="screen-glow"></div>
 
-      {/* Hidden native HTML audio element */}
-      <audio ref={audioRef} crossOrigin="anonymous" preload="auto" />
+                <span className="corner-tag tl"></span>
+                <span className="corner-tag tr"></span>
+                <span className="corner-tag bl"></span>
+                <span className="corner-tag br"></span>
 
-      </div> {/* end soundwave-app */}
+                <button
+                  className="fullscreen-btn"
+                  onClick={toggleFullscreen}
+                  title={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
+                  aria-label="Toggle plein écran"
+                >
+                  {isFullscreen ? (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 4v4H4M16 4v4h4M20 16h-4v4M4 16h4v4" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4" />
+                    </svg>
+                  )}
+                </button>
+
+                <div className="canvas-container">
+                  <UnifiedVisualizer
+                    analyser={analyser}
+                    analyserL={analyserL}
+                    analyserR={analyserR}
+                    currentTrack={currentTrack}
+                    strobeThreshold={strobeThreshold}
+                  />
+
+                  {!currentTrack && (
+                    <div className="no-track-overlay">
+                      <div className="overlay-content">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 0v1.5m0-1.5L9 12m10.5-6v10.5m-10.5-3L20 10.5M9 12v7.5m0-7.5l-6 3m6-3l6-3M3 15v4.5M3 15l6-3m-6 3h6m0 0v4.5" />
+                        </svg>
+                        <p>Sélectionnez une piste dans la playlist pour lancer la lecture et le visualiseur</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Sleek Responsive Mobile / Minimalist Hero Player Card */
+              <div className="mobile-player-hero">
+                <div className="mobile-hero-content">
+                  <div
+                    className="mobile-vinyl-cover"
+                    style={{
+                      background: currentTrack?.coverGradient || "linear-gradient(135deg, #fbbf24 0%, #8b5cf6 100%)",
+                      animation: isPlaying ? "spin 12s linear infinite" : "none"
+                    }}
+                  >
+                    <div className="mobile-vinyl-hole">
+                      <div className="vinyl-gold-center"></div>
+                    </div>
+                  </div>
+
+                  <div className="mobile-hero-details">
+                    <span className="mobile-genre-badge font-mono">
+                      {currentTrack?.playlist || (isMobile ? "Mode Mobile Optimisé" : "Mode Lecteur Épuré")}
+                    </span>
+                    <h3 className="mobile-track-title">
+                      {currentTrack ? currentTrack.title : "Aucun titre sélectionné"}
+                    </h3>
+                    <p className="mobile-track-artist">
+                      {currentTrack ? currentTrack.artist : "Choisissez un morceau ci-dessous"}
+                    </p>
+
+                    {isMobile && (
+                      <p className="mobile-perf-note font-mono">
+                        Visualiseur désactivé par défaut sur mobile pour garantir une fluidité maximale.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Playlist Sidebar / Manager */}
+          <aside className="sidebar-section">
+            <Playlist
+              tracks={tracks}
+              currentTrack={currentTrack}
+              isPlaying={isPlaying}
+              onTrackSelect={handleTrackSelect}
+              selectedPlaylist={selectedPlaylist}
+              onSelectPlaylist={setSelectedPlaylist}
+              playlists={playlists}
+            />
+          </aside>
+        </main>
+
+        {/* Hidden native HTML audio element */}
+        <audio ref={audioRef} crossOrigin="anonymous" preload="auto" />
+      </div>
 
       {/* Custom Bottom Player Control Bar */}
-      <div className={`player-bar-container ${currentTrack ? 'active' : ''}`}>
+      <div className={`player-bar-container ${currentTrack ? "active" : ""}`}>
         <div className="player-bar">
+          {/* Left: Track Info */}
           <div className="player-track-info">
             {currentTrack ? (
               <>
@@ -373,54 +581,62 @@ const SoundwaveApp: React.FC = () => {
                 />
                 <div className="player-meta">
                   <h4 className="player-title">{currentTrack.title}</h4>
-                  <p className="player-artist">{currentTrack.artist}</p>
+                  <div className="player-submeta">
+                    <span className="player-artist">{currentTrack.artist}</span>
+                    {currentTrack.playlist && (
+                      <span className="player-genre-tag font-mono">{currentTrack.playlist}</span>
+                    )}
+                  </div>
                 </div>
               </>
             ) : (
-              <div className="player-no-track">Aucune piste en lecture</div>
+              <div className="player-no-track font-mono">Prêt pour la lecture</div>
             )}
           </div>
 
+          {/* Center: Play Controls & Timeline */}
           <div className="player-middle">
             <div className="player-controls">
               <button
-                className={`ctrl-btn toggle-btn ${isShuffle ? 'active' : ''}`}
+                className={`ctrl-btn toggle-btn ${isShuffle ? "active" : ""}`}
                 onClick={() => setIsShuffle(!isShuffle)}
                 title="Lecture aléatoire"
+                aria-label="Lecture aléatoire"
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3M3 12a15.964 15.964 0 002.33 8.358m0 0L7.5 18m-2.17 2.358L3 18" />
                 </svg>
               </button>
 
-              <button className="ctrl-btn" onClick={handlePrev} title="Piste précédente">
+              <button className="ctrl-btn" onClick={handlePrev} title="Piste précédente" aria-label="Piste précédente">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                   <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                 </svg>
               </button>
 
-              <button className="play-pause-btn" onClick={handlePlayPause} title={isPlaying ? "Pause" : "Play"}>
+              <button className="play-pause-btn" onClick={handlePlayPause} title={isPlaying ? "Pause" : "Play"} aria-label={isPlaying ? "Pause" : "Play"}>
                 {isPlaying ? (
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                   </svg>
                 ) : (
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style={{ marginLeft: '2px' }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style={{ marginLeft: "2px" }}>
                     <path d="M8 5v14l11-7z"/>
                   </svg>
                 )}
               </button>
 
-              <button className="ctrl-btn" onClick={handleNext} title="Piste suivante">
+              <button className="ctrl-btn" onClick={handleNext} title="Piste suivante" aria-label="Piste suivante">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                   <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                 </svg>
               </button>
 
               <button
-                className={`ctrl-btn toggle-btn ${isRepeat ? 'active' : ''}`}
+                className={`ctrl-btn toggle-btn ${isRepeat ? "active" : ""}`}
                 onClick={() => setIsRepeat(!isRepeat)}
                 title="Répéter la piste"
+                aria-label="Répéter la piste"
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -429,7 +645,7 @@ const SoundwaveApp: React.FC = () => {
             </div>
 
             <div className="player-timeline">
-              <span className="time-label">{formatTime(currentTime)}</span>
+              <span className="time-label font-mono">{formatTime(currentTime)}</span>
               <div className="progress-slider-container">
                 <input
                   type="range"
@@ -439,17 +655,19 @@ const SoundwaveApp: React.FC = () => {
                   onChange={handleSeek}
                   className="progress-slider"
                   style={{
-                    background: `linear-gradient(to right, var(--neon-cyan) 0%, var(--neon-purple) ${currentProgressPercent}%, rgba(255, 255, 255, 0.08) ${currentProgressPercent}%, rgba(255, 255, 255, 0.08) 100%)`
+                    background: `linear-gradient(to right, #fbbf24 0%, #8b5cf6 ${currentProgressPercent}%, rgba(255, 255, 255, 0.1) ${currentProgressPercent}%, rgba(255, 255, 255, 0.1) 100%)`
                   }}
+                  aria-label="Barre de progression audio"
                 />
               </div>
-              <span className="time-label">{formatTime(duration)}</span>
+              <span className="time-label font-mono">{formatTime(duration)}</span>
             </div>
           </div>
 
+          {/* Right: Volume section */}
           <div className="player-right">
             <div className="volume-control">
-              <button className="ctrl-btn volume-btn" onClick={handleMuteToggle}>
+              <button className="ctrl-btn volume-btn" onClick={handleMuteToggle} title={isMuted ? "Réactiver le son" : "Couper le son"} aria-label="Contrôle du volume">
                 {isMuted || volume === 0 ? (
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6L4.5 9H1.5v6h3l4.5 3.75V5.25z" />
@@ -474,8 +692,9 @@ const SoundwaveApp: React.FC = () => {
                 onChange={handleVolumeChange}
                 className="volume-slider"
                 style={{
-                  background: `linear-gradient(to right, var(--neon-cyan) 0%, var(--neon-purple) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.08) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.08) 100%)`
+                  background: `linear-gradient(to right, #fbbf24 0%, #8b5cf6 ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.1) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.1) 100%)`
                 }}
+                aria-label="Réglage du volume"
               />
             </div>
           </div>

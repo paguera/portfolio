@@ -5,8 +5,9 @@ import authorize from "../middlewares/authorize.js";
 
 const router = Router();
 
-// Public route for logging visits
+// Public routes for logging visits & audio track listens
 router.post("/track", visitorsController.trackVisitor);
+router.post("/track-audio", visitorsController.trackAudioPlay);
 
 // Protected admin routes for retrieving analytics
 router.get(

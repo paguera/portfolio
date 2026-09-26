@@ -31,7 +31,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
   const peaksRef = useRef<number[]>([]);
   const backgroundParticles = useRef<Particle[]>([]);
   const wasBeatRef = useRef<boolean>(false);
-  const strobeColorRef = useRef<string>("hsla(50, 95%, 60%, ");
+  const strobeColorRef = useRef<string>("hsla(45, 100%, 55%, ");
   const logoImageRef = useRef<HTMLImageElement | null>(null);
   const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
 
@@ -74,7 +74,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
 
     let animationId: number;
 
-    const fftSize = 512; // Optimized size for high performance with combined visualizers
+    const fftSize = 512;
     if (activeAnalyser) activeAnalyser.fftSize = fftSize;
     if (activeAnalyserL) activeAnalyserL.fftSize = fftSize;
     if (activeAnalyserR) activeAnalyserR.fftSize = fftSize;
@@ -96,19 +96,18 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       peaksRef.current = new Array(barCount).fill(0);
     }
 
-    // Setup background particles (orbiting stars matching the circular star trails in the logo background)
+    // Setup background particles (warm gold, cyber yellow, cyber purple, coral)
     if (backgroundParticles.current.length === 0) {
       for (let i = 0; i < 45; i++) {
         const rand = Math.random();
         backgroundParticles.current.push({
-          x: Math.random() * 320 + 40, // Orbit radius (distance from center)
-          y: Math.random() * Math.PI * 2, // Current angle (in radians)
-          vx: (Math.random() * 0.002 + 0.0006) * (Math.random() > 0.5 ? 1 : -1), // Angular speed
-          vy: 0, // Unused
+          x: Math.random() * 320 + 40,
+          y: Math.random() * Math.PI * 2,
+          vx: (Math.random() * 0.002 + 0.0006) * (Math.random() > 0.5 ? 1 : -1),
+          vy: 0,
           alpha: Math.random() * 0.45 + 0.1,
           size: Math.random() * 1.8 + 0.8,
-          // Color scheme: Beige (from logo), Yellow, Cyan, Pink
-          color: rand > 0.7 ? "#c39c6b" : (rand > 0.45 ? "#facc15" : (rand > 0.2 ? "#06b6d4" : "#ec4899")),
+          color: rand > 0.7 ? "#c39c6b" : (rand > 0.45 ? "#fbbf24" : (rand > 0.2 ? "#8b5cf6" : "#ec4899")),
         });
       }
     }
@@ -120,7 +119,6 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
-        // Re-distribute orbit radii dynamically
         backgroundParticles.current.forEach(p => {
           p.x = Math.random() * (Math.min(width, height) * 0.75) + 30;
         });
@@ -129,7 +127,6 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      // Scale mouse position to coordinate space of canvas
       mouseRef.current = {
         x: ((e.clientX - rect.left) / rect.width) * canvas.width,
         y: ((e.clientY - rect.top) / rect.height) * canvas.height,
@@ -165,7 +162,6 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       } else if (activeAnalyser) {
         activeAnalyser.getByteTimeDomainData(dataArrayTimeMono);
         activeAnalyser.getByteFrequencyData(dataArrayFreqMono);
-        // Fallback L/R
         for (let i = 0; i < bufferLength; i++) {
           dataArrayTimeL[i] = dataArrayTimeMono[i];
           dataArrayTimeR[i] = dataArrayTimeMono[(i + 4) % bufferLength];
@@ -180,35 +176,34 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         freqSum += dataArrayFreqL[i];
       }
       const averageVolume = freqSum / 32;
-      const volumeRatio = averageVolume / 255; // 0.0 to 1.0
+      const volumeRatio = averageVolume / 255;
 
-      // Frequency bands ratios for reactive Gourd parts
+      // Frequency bands ratios
       const bassRatio = (dataArrayFreqL[3] || 0) / 255;
       const midRatio = (dataArrayFreqL[13] || 0) / 255;
       const highRatio = (dataArrayFreqL[26] || 0) / 255;
 
-      // 2. Clear canvas with afterglow effect
-      ctx.fillStyle = "rgba(10, 11, 16, 0.22)";
+      // 2. Clear canvas with dark slate afterglow effect
+      ctx.fillStyle = "rgba(24, 26, 32, 0.24)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // BEAT STROBE FLASH (Neon Random Color on powerful beats)
+      // BEAT STROBE FLASH (Warm Amber / Gold / Cyber Yellow / Purple hues - no blue)
       const isBeat = volumeRatio > strobeThreshold;
       if (isBeat) {
         if (!wasBeatRef.current) {
-          // Beat onset: Pick a random neon color (hues: yellow, cyan, pink, violet, green, orange)
-          const hues = [50, 190, 325, 280, 120, 25];
+          const hues = [45, 35, 275, 330, 20, 50]; // Yellow, amber, purple, magenta, orange, gold
           const randomHue = hues[Math.floor(Math.random() * hues.length)];
-          strobeColorRef.current = `hsla(${randomHue}, 95%, 60%, `;
+          strobeColorRef.current = `hsla(${randomHue}, 95%, 55%, `;
         }
         ctx.save();
-        ctx.fillStyle = strobeColorRef.current + `${0.04 + (volumeRatio - strobeThreshold) * 0.35})`; // Strobe flash
+        ctx.fillStyle = strobeColorRef.current + `${0.04 + (volumeRatio - strobeThreshold) * 0.35})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.restore();
       }
       wasBeatRef.current = isBeat;
 
-      // Dynamic screen shake (secousses) on strong beats
-      const shakeAmplitude = isBeat ? (volumeRatio - strobeThreshold) * 45 : 0;
+      // Dynamic screen shake on strong beats
+      const shakeAmplitude = isBeat ? (volumeRatio - strobeThreshold) * 35 : 0;
       const shakeX = (Math.random() - 0.5) * shakeAmplitude;
       const shakeY = (Math.random() - 0.5) * shakeAmplitude;
       
@@ -226,12 +221,11 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       const upperBulbRad = baseRadius * (0.72 + midRatio * 0.08);
       const lowerBulbRad = baseRadius * (1.05 + bassRatio * 0.1);
 
-      // 3. Draw Cyber Grid & Tech Geometric Elements (Noctalia styled)
+      // 3. Cyber Grid & Tech Geometric Elements (Cyber Yellow / Violet)
       ctx.save();
-      // Grid flashes the random beat color on the beat, otherwise uses subtle purple
       ctx.strokeStyle = isBeat
         ? strobeColorRef.current + `${0.08 + volumeRatio * 0.12})`
-        : `rgba(139, 92, 246, ${0.025 + volumeRatio * 0.05})`;
+        : `rgba(251, 191, 36, ${0.02 + volumeRatio * 0.04})`;
       ctx.lineWidth = 1;
       const gridRows = 8;
       for (let i = 1; i < gridRows; i++) {
@@ -250,21 +244,20 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         ctx.stroke();
       }
 
-      // 3.1. Draw a Grid Mesh of Audio-Reactive Waveforms (Quadrillage)
-      // 3.1. Draw a Grid Mesh of Audio-Reactive Waveforms (Quadrillage) warping around logo contours
+      // 3.1. Grid Mesh of Audio-Reactive Waveforms warping around logo contours
       const warpPointAroundLogo = (x: number, y: number) => {
         let wx = x;
         let wy = y;
         const circles = [
-          { cx: centerX, cy: centerY - baseRadius * 2.05, r: baseRadius * 0.24 }, // Top loop
-          { cx: centerX, cy: centerY - baseRadius * 1.25, r: baseRadius * 0.74 }, // Upper bulb
-          { cx: centerX, cy: centerY, r: baseRadius * 1.07 }                       // Lower bulb
+          { cx: centerX, cy: centerY - baseRadius * 2.05, r: baseRadius * 0.24 },
+          { cx: centerX, cy: centerY - baseRadius * 1.25, r: baseRadius * 0.74 },
+          { cx: centerX, cy: centerY, r: baseRadius * 1.07 }
         ];
         for (const c of circles) {
           const dx = wx - c.cx;
           const dy = wy - c.cy;
           const dist = Math.hypot(dx, dy);
-          const avoidDist = c.r + 12; // Radius + margin
+          const avoidDist = c.r + 12;
           if (dist < avoidDist && dist > 0) {
             const push = avoidDist - dist;
             wx += (dx / dist) * push;
@@ -286,7 +279,6 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
           const yOffset = v - 1.0;
           const x = i * sliceWidth;
           const y = yCenter + yOffset * 22 * Math.sin((i / bufferLength) * Math.PI);
-          
           const warped = warpPointAroundLogo(x, y);
 
           if (i === 0) ctx.moveTo(warped.x, warped.y);
@@ -305,10 +297,9 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         const sliceHeight = canvas.height / bufferLength;
         for (let i = 0; i < bufferLength; i++) {
           const v = data[i] / 128.0;
-          const xOffset = v - 1.0;
-          const y = i * sliceHeight;
-          const x = xCenter + xOffset * 22 * Math.sin((i / bufferLength) * Math.PI);
-          
+          const yOffset = v - 1.0;
+          const x = i * sliceHeight;
+          const y = xCenter + yOffset * 22 * Math.sin((i / bufferLength) * Math.PI);
           const warped = warpPointAroundLogo(x, y);
 
           if (i === 0) ctx.moveTo(warped.x, warped.y);
@@ -318,41 +309,40 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         ctx.restore();
       };
 
-      // 4 horizontal waveforms forming the horizontal lines of the mesh
-      drawMeshWaveHorizontal(canvas.height * 0.2, dataArrayTimeL, "#06b6d4"); // Cyan
-      drawMeshWaveHorizontal(canvas.height * 0.4, dataArrayTimeR, "#ec4899"); // Pink
-      drawMeshWaveHorizontal(canvas.height * 0.6, dataArrayTimeL, "#ec4899"); // Pink
-      drawMeshWaveHorizontal(canvas.height * 0.8, dataArrayTimeR, "#06b6d4"); // Cyan
+      // Cyber Yellow, Purple, Warm Gold & Amber waveforms
+      drawMeshWaveHorizontal(canvas.height * 0.2, dataArrayTimeL, "#fbbf24"); // Yellow
+      drawMeshWaveHorizontal(canvas.height * 0.4, dataArrayTimeR, "#8b5cf6"); // Purple
+      drawMeshWaveHorizontal(canvas.height * 0.6, dataArrayTimeL, "#ec4899"); // Coral
+      drawMeshWaveHorizontal(canvas.height * 0.8, dataArrayTimeR, "#f59e0b"); // Amber
 
-      // 4 vertical waveforms forming the vertical lines of the mesh
-      drawMeshWaveVertical(canvas.width * 0.2, dataArrayTimeR, "#ec4899"); // Pink
-      drawMeshWaveVertical(canvas.width * 0.4, dataArrayTimeL, "#06b6d4"); // Cyan
-      drawMeshWaveVertical(canvas.width * 0.6, dataArrayTimeR, "#06b6d4"); // Cyan
-      drawMeshWaveVertical(canvas.width * 0.8, dataArrayTimeL, "#ec4899"); // Pink
+      drawMeshWaveVertical(canvas.width * 0.2, dataArrayTimeR, "#8b5cf6"); // Purple
+      drawMeshWaveVertical(canvas.width * 0.4, dataArrayTimeL, "#fbbf24"); // Yellow
+      drawMeshWaveVertical(canvas.width * 0.6, dataArrayTimeR, "#f59e0b"); // Amber
+      drawMeshWaveVertical(canvas.width * 0.8, dataArrayTimeL, "#ec4899"); // Coral
 
-      // Tech Concentric Rings (Radar/Grid style - now with logo beige/cyan accents)
-      ctx.strokeStyle = `rgba(6, 182, 212, ${0.03 + volumeRatio * 0.05})`;
+      // Tech Concentric Rings (Gold & Amber accents)
+      ctx.strokeStyle = `rgba(251, 191, 36, ${0.04 + volumeRatio * 0.06})`;
       ctx.lineWidth = 0.8;
       ctx.setLineDash([4, 6]);
       ctx.beginPath();
       ctx.arc(centerX, centerY, baseRadius * 1.55, 0, Math.PI * 2);
       ctx.stroke();
 
-      ctx.strokeStyle = `rgba(195, 156, 107, ${0.06 + volumeRatio * 0.08})`; // Logo beige dotted ring
+      ctx.strokeStyle = `rgba(195, 156, 107, ${0.06 + volumeRatio * 0.08})`;
       ctx.beginPath();
       ctx.arc(centerX, centerY, baseRadius * 2.2, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.setLineDash([]); // Reset dash
+      ctx.setLineDash([]);
 
-      // --- SPIRALES INFERNALES (Hypnotic, beat-pulsing interweaving spirals) ---
+      // --- SPIRALES INFERNALES (Yellow & Purple) ---
       ctx.save();
       const spiralRot = rotationRef.current * 1.5;
-      const maxSpiralAngle = 8 * Math.PI; // 4 rotations
+      const maxSpiralAngle = 8 * Math.PI;
       const spiralStep = 0.08;
       
-      // Spiral 1: Neon Pink rotating clockwise
-      ctx.strokeStyle = `rgba(236, 72, 153, ${0.05 + volumeRatio * 0.15})`;
-      ctx.shadowColor = "#ec4899";
+      // Spiral 1: Cyber Purple
+      ctx.strokeStyle = `rgba(139, 92, 246, ${0.06 + volumeRatio * 0.16})`;
+      ctx.shadowColor = "#8b5cf6";
       ctx.shadowBlur = 10;
       ctx.lineWidth = 1.6;
       ctx.beginPath();
@@ -365,9 +355,9 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       }
       ctx.stroke();
 
-      // Spiral 2: Neon Cyan rotating counter-clockwise
-      ctx.strokeStyle = `rgba(6, 182, 212, ${0.05 + volumeRatio * 0.15})`;
-      ctx.shadowColor = "#06b6d4";
+      // Spiral 2: Cyber Yellow
+      ctx.strokeStyle = `rgba(251, 191, 36, ${0.06 + volumeRatio * 0.16})`;
+      ctx.shadowColor = "#fbbf24";
       ctx.shadowBlur = 10;
       ctx.lineWidth = 1.6;
       ctx.beginPath();
@@ -381,17 +371,17 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       ctx.stroke();
       ctx.restore();
 
-      // --- LOGO INSPIRATION: Double-chamber speaker/gourd silhouette outline in background ---
+      // --- LOGO SILHOUETTE ---
       ctx.save();
-      ctx.strokeStyle = `rgba(195, 156, 107, ${0.08 + volumeRatio * 0.15})`; // Logo beige
+      ctx.strokeStyle = `rgba(195, 156, 107, ${0.08 + volumeRatio * 0.15})`;
       ctx.shadowColor = "#c39c6b";
       ctx.shadowBlur = 8 + volumeRatio * 12;
       ctx.lineWidth = 1.6;
 
-      // 1. Top Carrying Loop / Handle (Reacts to High frequencies)
+      // 1. Top Carrying Loop / Handle
       if (highRatio > 0.6) {
-        ctx.strokeStyle = "rgba(6, 182, 212, 0.4)"; // Flashes cyan on highs
-        ctx.shadowColor = "#06b6d4";
+        ctx.strokeStyle = "rgba(251, 191, 36, 0.4)";
+        ctx.shadowColor = "#fbbf24";
       }
       ctx.beginPath();
       ctx.arc(centerX, centerY - baseRadius * 2.05, topLoopRad, 0, Math.PI * 2);
@@ -399,50 +389,47 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       ctx.beginPath();
       ctx.arc(centerX, centerY - baseRadius * 2.05, topInnerRad, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.strokeStyle = `rgba(195, 156, 107, ${0.08 + volumeRatio * 0.15})`; // Reset stroke
+      ctx.strokeStyle = `rgba(195, 156, 107, ${0.08 + volumeRatio * 0.15})`;
       ctx.shadowColor = "#c39c6b";
 
-      // 2. Upper Bulb / Chamber (Reacts to Mid/Vocal frequencies)
+      // 2. Upper Bulb / Chamber
       if (midRatio > 0.6) {
-        ctx.strokeStyle = "rgba(236, 72, 153, 0.4)"; // Flashes pink on mids
-        ctx.shadowColor = "#ec4899";
+        ctx.strokeStyle = "rgba(139, 92, 246, 0.4)";
+        ctx.shadowColor = "#8b5cf6";
       }
       ctx.beginPath();
       ctx.arc(centerX, centerY - baseRadius * 1.25, upperBulbRad, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.strokeStyle = `rgba(195, 156, 107, ${0.08 + volumeRatio * 0.15})`; // Reset stroke
+      ctx.strokeStyle = `rgba(195, 156, 107, ${0.08 + volumeRatio * 0.15})`;
       ctx.shadowColor = "#c39c6b";
 
-      // 3. Lower Bulb / Chamber (Reacts to Bass/Kick)
+      // 3. Lower Bulb / Chamber
       ctx.beginPath();
       ctx.arc(centerX, centerY, lowerBulbRad, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 4. Two feet at the bottom (Displace slightly with bass kick)
+      // 4. Two feet at bottom
       ctx.lineWidth = 2.5;
       ctx.lineCap = "round";
       const feetDisplacement = baseRadius * (0.55 + bassRatio * 0.05);
-      // Left foot
       ctx.beginPath();
       ctx.arc(centerX - feetDisplacement, centerY + baseRadius * 0.9, baseRadius * 0.12, Math.PI * 0.7, Math.PI * 1.2);
       ctx.stroke();
-      // Right foot
       ctx.beginPath();
       ctx.arc(centerX + feetDisplacement, centerY + baseRadius * 0.9, baseRadius * 0.12, Math.PI * 1.8, Math.PI * 0.3);
       ctx.stroke();
       ctx.restore();
 
-      // --- LOGO INSPIRATION: Speaker surround ring with 6 screws/points ---
+      // Speaker surround ring with 6 screws
       ctx.save();
-      ctx.strokeStyle = `rgba(195, 156, 107, ${0.12 + volumeRatio * 0.15})`; // Beige speaker ring
+      ctx.strokeStyle = `rgba(195, 156, 107, ${0.12 + volumeRatio * 0.15})`;
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.arc(centerX, centerY, baseRadius + 14, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Draw the 6 dots/screws around the circle (just like the speaker cone in the logo)
-      ctx.fillStyle = `rgba(195, 156, 107, ${0.35 + volumeRatio * 0.45})`;
-      ctx.shadowColor = "#c39c6b";
+      ctx.fillStyle = `rgba(251, 191, 36, ${0.35 + volumeRatio * 0.45})`;
+      ctx.shadowColor = "#fbbf24";
       ctx.shadowBlur = 4;
       for (let i = 0; i < 6; i++) {
         const angle = (i * Math.PI * 2) / 6;
@@ -454,7 +441,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       }
       ctx.restore();
 
-      // Outer background slow rotating octagon (now colored in logo beige)
+      // Outer background slow rotating octagon
       ctx.save();
       ctx.translate(centerX, centerY);
       ctx.rotate(-rotationRef.current * 0.15);
@@ -474,34 +461,30 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       ctx.stroke();
       ctx.restore();
 
-      // Cyber Corner brackets
+      // Cyber Corner brackets (Cyber Yellow)
       const bracketSize = 14;
       const bracketMargin = 12;
-      ctx.strokeStyle = "rgba(6, 182, 212, 0.22)";
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
       ctx.lineWidth = 1.5;
 
-      // Top Left
       ctx.beginPath();
       ctx.moveTo(bracketMargin + bracketSize, bracketMargin);
       ctx.lineTo(bracketMargin, bracketMargin);
       ctx.lineTo(bracketMargin, bracketMargin + bracketSize);
       ctx.stroke();
 
-      // Top Right
       ctx.beginPath();
       ctx.moveTo(canvas.width - bracketMargin - bracketSize, bracketMargin);
       ctx.lineTo(canvas.width - bracketMargin, bracketMargin);
       ctx.lineTo(canvas.width - bracketMargin, bracketMargin + bracketSize);
       ctx.stroke();
 
-      // Bottom Left
       ctx.beginPath();
       ctx.moveTo(bracketMargin + bracketSize, canvas.height - bracketMargin);
       ctx.lineTo(bracketMargin, canvas.height - bracketMargin);
       ctx.lineTo(bracketMargin, canvas.height - bracketMargin - bracketSize);
       ctx.stroke();
 
-      // Bottom Right
       ctx.beginPath();
       ctx.moveTo(canvas.width - bracketMargin - bracketSize, canvas.height - bracketMargin);
       ctx.lineTo(canvas.width - bracketMargin, canvas.height - bracketMargin);
@@ -510,18 +493,14 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
 
       ctx.restore();
 
-      // 4. Update and Draw Background Constellation Particles (Orbiting to trace star trails)
+      // 4. Background Constellation Particles
       ctx.save();
       const pts = backgroundParticles.current;
       const ptCoords = pts.map(p => {
-        // Increment angle for orbital rotation
         p.y += p.vx * (1 + volumeRatio * 1.6);
-        
-        // Translate polar coords (radius p.x, angle p.y) to Cartesian (px, py)
         const px = centerX + Math.cos(p.y) * p.x;
         const py = centerY + Math.sin(p.y) * p.x;
 
-        // Mouse attraction effect
         let drawPx = px;
         let drawPy = py;
         if (mouseRef.current.active) {
@@ -530,13 +509,11 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
           const dist = Math.hypot(dx, dy);
           if (dist < 130 && dist > 0) {
             const pullForce = (130 - dist) / 130;
-            // Pull them towards the mouse
             drawPx -= (dx / dist) * pullForce * 20;
             drawPy -= (dy / dist) * pullForce * 20;
           }
         }
 
-        // Twinkle/scintillation: fluctuate alpha slightly over time
         const twinkleFactor = Math.sin(Date.now() * 0.005 + p.x) * 0.08;
         const finalAlpha = Math.max(0.08, Math.min(p.alpha + twinkleFactor, 0.9));
 
@@ -549,8 +526,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         return { x: drawPx, y: drawPy };
       });
 
-      // Draw thin lines between nearby orbiting particles to create a digital sky net
-      ctx.strokeStyle = "rgba(195, 156, 107, 0.04)"; // Beige trail line
+      ctx.strokeStyle = "rgba(195, 156, 107, 0.04)";
       ctx.lineWidth = 0.8;
       for (let i = 0; i < pts.length; i++) {
         for (let j = i + 1; j < pts.length; j++) {
@@ -565,9 +541,8 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       }
       ctx.restore();
 
-      // 5. Draw Frequency Bars Radiating Outwards from the Speaker Gourd Logo Contours
+      // 5. Frequency Bars Radiating Outwards
       ctx.save();
-      
       const drawRadialBarsOnCircle = (
         cx: number,
         cy: number,
@@ -592,12 +567,11 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
 
         for (let i = 0; i < barCountForSec; i++) {
           const angle = startAngle + i * angleStep;
-          // Distribute sample index across the lower frequency bands (up to 50%)
           const sampleIndex = Math.floor((i / barCountForSec) * bufferLength * 0.5);
           const value = useLeft ? dataArrayFreqL[sampleIndex] : dataArrayFreqR[sampleIndex];
           
           const barHeight = (value / 255) * maxH;
-          if (barHeight < 1.5) continue; // skip flat values
+          if (barHeight < 1.5) continue;
 
           const xStart = cx + Math.cos(angle) * r;
           const yStart = cy + Math.sin(angle) * r;
@@ -612,8 +586,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         ctx.restore();
       };
 
-      // 1. Draw bars around the Main Lower Bulb (32 bars, split L/R channels)
-      // Left side: Math.PI / 2 to (Math.PI * 1.5)
+      // Lower bulb: Left = Cyber Yellow, Right = Cyber Purple
       drawRadialBarsOnCircle(
         centerX,
         centerY,
@@ -622,11 +595,10 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         Math.PI * 1.5,
         16,
         true,
-        "#06b6d4",
-        "#06b6d4",
+        "#fbbf24",
+        "#fbbf24",
         22
       );
-      // Right side: -Math.PI / 2 to Math.PI / 2
       drawRadialBarsOnCircle(
         centerX,
         centerY,
@@ -635,12 +607,12 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         Math.PI * 0.5,
         16,
         false,
-        "#ec4899",
-        "#ec4899",
+        "#8b5cf6",
+        "#8b5cf6",
         22
       );
 
-      // 2. Draw bars around the Upper Bulb (20 bars, mids/pink)
+      // Upper bulb: Warm Amber
       drawRadialBarsOnCircle(
         centerX,
         centerY - baseRadius * 1.25,
@@ -649,12 +621,12 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         Math.PI * 1.95,
         20,
         true,
-        "#ec4899",
-        "#ec4899",
+        "#f59e0b",
+        "#f59e0b",
         18
       );
 
-      // 3. Draw bars around the Top Loop (12 bars, highs/beige)
+      // Top loop: Gold
       drawRadialBarsOnCircle(
         centerX,
         centerY - baseRadius * 2.05,
@@ -670,7 +642,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
 
       ctx.restore();
 
-      // 6. Draw Concentric Circular Stereo Waveforms (Left & Right channels)
+      // 6. Concentric Circular Stereo Waveforms (Yellow & Purple)
       const drawCircularWave = (
         data: Uint8Array,
         color: string,
@@ -691,33 +663,24 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
           const idx = i % bufferLength;
           const v = data[idx] / 128.0;
           const yOffset = v - 1.0;
-          
-          // Angle maps from 0 to 2*PI
           const angle = (i / bufferLength) * Math.PI * 2;
-          
-          // Modulate the radius with the time-domain waveform amplitude
           const r = targetRadius + yOffset * 40 * amplitudeScale;
           const x = centerX + Math.cos(angle) * r;
           const y = centerY + Math.sin(angle) * r;
 
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
         ctx.stroke();
         ctx.restore();
       };
 
-      // Draw Left circular wave (cyan)
-      drawCircularWave(dataArrayTimeL, "#06b6d4", "#06b6d4", baseRadius + 38, 0.9);
-      // Draw Right circular wave (pink)
-      drawCircularWave(dataArrayTimeR, "#ec4899", "#ec4899", baseRadius + 65, 0.9);
+      // Left circular wave (Cyber Yellow)
+      drawCircularWave(dataArrayTimeL, "#fbbf24", "#fbbf24", baseRadius + 38, 0.9);
+      // Right circular wave (Cyber Purple)
+      drawCircularWave(dataArrayTimeR, "#8b5cf6", "#8b5cf6", baseRadius + 65, 0.9);
 
-      // 7. Draw Circular Centerpiece Visualizer (Radius precalculated above)
-
-      // Glow backdrop for circular plate
+      // 7. Centerpiece Visualizer Plate
       ctx.save();
       const radialGlow = ctx.createRadialGradient(
         centerX,
@@ -727,52 +690,50 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         centerY,
         baseRadius + 60
       );
-      radialGlow.addColorStop(0, "rgba(139, 92, 246, 0.22)");
-      radialGlow.addColorStop(0.5, "rgba(6, 182, 212, 0.06)");
-      radialGlow.addColorStop(1, "rgba(10, 11, 16, 0)");
+      radialGlow.addColorStop(0, "rgba(251, 191, 36, 0.15)");
+      radialGlow.addColorStop(0.5, "rgba(139, 92, 246, 0.06)");
+      radialGlow.addColorStop(1, "rgba(24, 26, 32, 0)");
       ctx.fillStyle = radialGlow;
       ctx.beginPath();
       ctx.arc(centerX, centerY, baseRadius + 60, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // DANCING CIRCULAR LEVEL BAR / VU METER RING (Neon Yellow)
+      // DANCING CIRCULAR VU METER RING (Cyber Yellow)
       ctx.save();
-      ctx.strokeStyle = "rgba(250, 204, 21, 0.4)";
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.5)";
       ctx.lineWidth = 5;
       ctx.lineCap = "round";
-      ctx.shadowColor = "#facc15";
+      ctx.shadowColor = "#fbbf24";
       ctx.shadowBlur = 12;
       
-      // Draw level arc starting from top (-PI/2) and spanning based on volumeRatio
       const startAngle = -Math.PI / 2;
       const endAngle = startAngle + (volumeRatio * Math.PI * 2);
       ctx.beginPath();
       ctx.arc(centerX, centerY, baseRadius + 14, startAngle, endAngle);
       ctx.stroke();
 
-      // Outer thin reference ring for level gauge
-      ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.2)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(centerX, centerY, baseRadius + 14, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
 
-      // Draw Center vinyl disk / record (Opaque to cover waveforms behind it)
+      // Center vinyl disk
       ctx.save();
       ctx.translate(centerX, centerY);
 
       const diskGrad = ctx.createLinearGradient(-baseRadius, -baseRadius, baseRadius, baseRadius);
-      diskGrad.addColorStop(0, "#111827");
-      diskGrad.addColorStop(0.5, "#030712");
-      diskGrad.addColorStop(1, "#0b0f19");
+      diskGrad.addColorStop(0, "#252831");
+      diskGrad.addColorStop(0.5, "#181a20");
+      diskGrad.addColorStop(1, "#121316");
       ctx.fillStyle = diskGrad;
       ctx.beginPath();
       ctx.arc(0, 0, baseRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Outer silver ring of record
+      // Vinyl outer ring
       ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
       ctx.lineWidth = 2.5;
       ctx.stroke();
@@ -786,14 +747,13 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         ctx.stroke();
       }
 
-      // 8. Draw Lissajous Phase Plot inside the vinyl disk center!
+      // 8. Lissajous Phase Plot inside the vinyl disk center (Cyber Yellow / Amber)
       ctx.save();
-      // Make Lissajous massive, spanning across the visualizer
       const lissajousRadius = minDim * 0.65;
-      ctx.strokeStyle = "rgba(34, 211, 238, 0.65)"; // Neon Cyan vector trace
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.75)";
       ctx.lineWidth = 2.2;
       ctx.shadowBlur = 12;
-      ctx.shadowColor = "#06b6d4";
+      ctx.shadowColor = "#fbbf24";
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.beginPath();
@@ -802,98 +762,88 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         const leftVal = (dataArrayTimeL[i] - 128) / 128;
         const rightVal = (dataArrayTimeR[i] - 128) / 128;
 
-        // mid/side 45-degree rotation
         const lx = (leftVal - rightVal) * 0.707;
         const ly = (leftVal + rightVal) * 0.707;
 
         const posX = lx * lissajousRadius;
-        const posY = -ly * lissajousRadius; // canvas invert Y
+        const posY = -ly * lissajousRadius;
 
-        if (i === 0) {
-          ctx.moveTo(posX, posY);
-        } else {
-          ctx.lineTo(posX, posY);
-        }
+        if (i === 0) ctx.moveTo(posX, posY);
+        else ctx.lineTo(posX, posY);
       }
       ctx.stroke();
       ctx.restore();
 
-      // Record Center sticker background
-      ctx.fillStyle = "#030712";
+      // Record Center sticker
+      ctx.fillStyle = "#181a20";
       ctx.beginPath();
       ctx.arc(0, 0, 18, 0, Math.PI * 2);
       ctx.fill();
 
-      // Outer sticker silver ring
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.3)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(0, 0, 18, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Gold core hole ring
-      ctx.strokeStyle = "rgba(251, 191, 36, 0.7)";
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.85)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(0, 0, 5, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 8.1. Draw futuristic Record Needle Laser Arm (Noctalia styled)
+      // 8.1. Record Needle Laser Arm (Yellow / Amber laser)
       ctx.save();
-      // Anchor position (top right relative to center)
       const anchorX = baseRadius * 1.25;
       const anchorY = -baseRadius * 1.05;
       
-      // Target position on the vinyl record grooves (moving slightly with music volume/time)
       const angleSweep = Math.PI * 0.85 + Math.sin(Date.now() * 0.001) * 0.05;
       const targetR = baseRadius * 0.72 + volumeRatio * 4;
       const targetX = Math.cos(angleSweep) * targetR;
       const targetY = Math.sin(angleSweep) * targetR;
 
       // Draw anchor base
-      ctx.fillStyle = "#c39c6b"; // Beige/Gold anchor
-      ctx.strokeStyle = "#06b6d4"; // Cyan glow
+      ctx.fillStyle = "#c39c6b";
+      ctx.strokeStyle = "#fbbf24";
       ctx.lineWidth = 1;
       ctx.shadowBlur = 4;
-      ctx.shadowColor = "#06b6d4";
+      ctx.shadowColor = "#fbbf24";
       ctx.beginPath();
       ctx.arc(anchorX, anchorY, 7, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      // Draw main mechanical arm rod
+      // Main mechanical arm rod
       ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(anchorX, anchorY);
-      // Bend point in the middle
       const bendX = anchorX - baseRadius * 0.3;
       const bendY = anchorY + baseRadius * 0.5;
       ctx.lineTo(bendX, bendY);
       ctx.lineTo(targetX, targetY);
       ctx.stroke();
 
-      // Draw Cyan laser emitter head
-      ctx.fillStyle = "#06b6d4";
+      // Laser emitter head (Cyber Yellow)
+      ctx.fillStyle = "#fbbf24";
       ctx.shadowBlur = 8;
-      ctx.shadowColor = "#06b6d4";
+      ctx.shadowColor = "#fbbf24";
       ctx.beginPath();
       ctx.arc(targetX, targetY, 3, 0, Math.PI * 2);
       ctx.fill();
 
-      // Draw laser reading ray (glowing dot and circular flare under the tip)
-      ctx.strokeStyle = "rgba(34, 211, 238, 0.65)";
+      // Laser reading ray
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.7)";
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.arc(targetX, targetY, 8 + volumeRatio * 10, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
 
-      ctx.restore(); // Restores center disk translation
+      ctx.restore();
+      ctx.restore();
 
-      ctx.restore(); // Restores shake translation
-
-      // CRT Scanlines Effect (Retro monitor grid)
+      // CRT Scanlines Effect
       ctx.save();
       ctx.strokeStyle = "rgba(255, 255, 255, 0.015)";
       ctx.lineWidth = 1;
@@ -905,7 +855,7 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
       }
       ctx.restore();
 
-      // Beat-Driven Horizontal Glitch slices
+      // Beat-Driven Horizontal Glitch slices (Warm Amber/Yellow)
       if (isBeat && Math.random() < 0.38) {
         ctx.save();
         const slices = Math.floor(Math.random() * 3) + 1;
@@ -913,12 +863,11 @@ const UnifiedVisualizer: React.FC<UnifiedVisualizerProps> = ({
         for (let s = 0; s < slices; s++) {
           const sy = Math.random() * canvas.height;
           const sh = Math.random() * 14 + 4;
-          const sxShift = (Math.random() - 0.5) * 24; // Horizontal warp offset
+          const sxShift = (Math.random() - 0.5) * 24;
           ctx.fillRect(sxShift, sy, canvas.width, sh);
         }
         ctx.restore();
       }
-
     };
 
     draw();

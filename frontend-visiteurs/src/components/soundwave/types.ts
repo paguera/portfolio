@@ -2,11 +2,15 @@ export interface Track {
   id: string;
   title: string;
   artist: string;
-  album: string;
+  album?: string;
   duration: string;
   url: string;
   coverGradient: string;
+  playlist?: string;
 }
 
-// Modes de visualisation disponibles dans le lecteur Soundwave
-export type VisualizerMode = 'waveform' | 'bars' | 'circular' | 'particles' | 'phase' | 'all';
+export interface PlaylistInfo {
+  id: string;
+  name: string;
+  count: number;
+}

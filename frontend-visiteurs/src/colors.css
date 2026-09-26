@@ -11,30 +11,32 @@
 
   /* Theme mappings aligned with CV colors */
   --color-primary: var(--cyber-cyan);
-  --color-secondary: var(--cyber-blue);
+  --color-secondary: var(--cyber-yellow);
   --color-bg-main: #1f2128;
   --color-bg-panel: #252831;
   --color-text-main: var(--white);
   --color-text-muted: var(--light-gray);
   --color-border-subtle: var(--medium-slate-gray);
 
-  /* Soundwave Visualizer Tokens */
+  /* Soundwave Visualizer & Audio Player Tokens */
   --bg-dark: #181a20;
-  --bg-card: rgba(37, 40, 49, 0.65);
-  --bg-card-hover: rgba(255, 255, 255, 0.05);
+  --bg-card: rgba(37, 40, 49, 0.7);
+  --bg-card-hover: rgba(255, 255, 255, 0.06);
   --border-color: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(168, 85, 247, 0.2);
+  --border-glow: rgba(251, 191, 36, 0.25);
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
-  --neon-purple: #a855f7;
-  --neon-cyan: #06b6d4;
+  --neon-yellow: #fbbf24;
+  --neon-amber: #f59e0b;
+  --neon-purple: #8b5cf6;
   --neon-pink: #ec4899;
-  --neon-purple-glow: rgba(168, 85, 247, 0.5);
-  --neon-cyan-glow: rgba(6, 182, 212, 0.5);
+  --neon-gold: #c39c6b;
+  --neon-yellow-glow: rgba(251, 191, 36, 0.45);
+  --neon-purple-glow: rgba(139, 92, 246, 0.45);
 
   --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }

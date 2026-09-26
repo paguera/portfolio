@@ -129,6 +129,7 @@ CREATE INDEX idx_projects_category ON projects(category_id);
 CREATE TABLE IF NOT EXISTS visitors (
     id SERIAL PRIMARY KEY,
     visitor_uuid VARCHAR(255) NOT NULL UNIQUE,
+    ip VARCHAR(100),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     last_visit_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     total_visits INT DEFAULT 1
@@ -137,6 +138,7 @@ CREATE TABLE IF NOT EXISTS visitors (
 CREATE TABLE IF NOT EXISTS page_views (
     id SERIAL PRIMARY KEY,
     visitor_uuid VARCHAR(255) NOT NULL,
+    ip VARCHAR(100),
     path VARCHAR(255) NOT NULL DEFAULT '/',
     referrer VARCHAR(500),
     browser VARCHAR(50),
@@ -145,7 +147,22 @@ CREATE TABLE IF NOT EXISTS page_views (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS audio_plays (
+    id SERIAL PRIMARY KEY,
+    visitor_uuid VARCHAR(255) NOT NULL,
+    ip VARCHAR(100),
+    track_id VARCHAR(255) NOT NULL,
+    track_title VARCHAR(255) NOT NULL,
+    track_artist VARCHAR(255) DEFAULT 'Paguera',
+    playlist VARCHAR(100) DEFAULT 'Général',
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at);
 CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views (path);
 CREATE INDEX IF NOT EXISTS idx_page_views_visitor ON page_views (visitor_uuid);
+CREATE INDEX IF NOT EXISTS idx_page_views_ip ON page_views (ip);
+CREATE INDEX IF NOT EXISTS idx_audio_plays_created_at ON audio_plays (created_at);
+CREATE INDEX IF NOT EXISTS idx_audio_plays_track_title ON audio_plays (track_title);
+
 

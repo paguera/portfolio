@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import Navbar from "./Navbar";
+import PrivacyNotice from "./PrivacyNotice";
 import { apiFetch } from "../utils/api";
 
 const Layout: React.FC = () => {
@@ -94,6 +95,8 @@ const Layout: React.FC = () => {
           &copy; {new Date().getFullYear()} PAGUERA - ALL RIGHTS RESERVED.
         </p>
       </footer>
+
+      <PrivacyNotice />
     </div>
   );
 };
