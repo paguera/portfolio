@@ -6,6 +6,11 @@ export default interface ProjectData {
   github_url?: string
   demo_url: string
   image_url: string
+  is_published?: boolean
+  is_featured?: boolean
+  content_markdown?: string
+  slug?: string
+  display_order?: number
   // Liste des IDs des technologies associées (pour l'insertion/modification)
   technology_ids?: number[]
   // Les objets technologies complets (pour l'affichage, retournés par le modèle)
@@ -21,3 +26,4 @@ export default interface ProjectData {
     url: string
   }>
 }
+

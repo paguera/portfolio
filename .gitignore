@@ -148,3 +148,9 @@ vite.config.ts.timestamp-*
 
 # Media & Audio assets
 **/public/audio
+uploads/
+**/uploads
+
+# Task roadmaps
+TODO.md
+

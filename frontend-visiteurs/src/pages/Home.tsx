@@ -1,8 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import type { SiteSettings } from "../types";
+import { apiFetch } from "../utils/api";
 
 const Home: React.FC = () => {
+  const [settings, setSettings] = useState<SiteSettings>({
+    availability_status: "Disponible pour de nouvelles opportunités",
+    is_available: "true",
+    hero_title_accent: "Développeur Full-Stack & futur DevOps",
+    hero_bio: "Passionné par la conception d'applications web robustes, l'architecture logicielle et l'automatisation des déploiements. Je construis des solutions complètes de la base de données jusqu'à l'infrastructure."
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await apiFetch<SiteSettings>("/settings");
+        if (data && Object.keys(data).length > 0) {
+          setSettings(prev => ({ ...prev, ...data }));
+        }
+      } catch (err) {
+        console.debug("Paramètres locaux par défaut utilisés:", err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const isAvailable = settings.is_available !== "false";
+  const availabilityText = settings.availability_status || "Disponible pour de nouvelles opportunités";
+  const heroSubtitle = settings.hero_title_accent || "Développeur Full-Stack & futur DevOps";
+  const heroBio = settings.hero_bio || "Passionné par la conception d'applications web robustes...";
+
   return (
     <>
       <Helmet>
@@ -17,22 +45,25 @@ const Home: React.FC = () => {
         {/* HERO SECTION */}
         <section className="flex flex-col-reverse md:flex-row items-center justify-between gap-10 md:gap-14 border-b-2 border-border-subtle pb-14">
           <div className="flex-1 text-center md:text-left space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyber-cyan/40 border border-cyber-yellow/40 text-cyber-yellow text-xs font-mono tracking-wider uppercase">
-              <span className="w-2 h-2 rounded-full bg-cyber-yellow animate-pulse"></span>
-              Disponible pour de nouvelles opportunités
-            </div>
+            {isAvailable && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyber-cyan/40 border border-cyber-yellow/40 text-cyber-yellow text-xs font-mono tracking-wider uppercase">
+                <span className="w-2 h-2 rounded-full bg-cyber-yellow animate-pulse"></span>
+                {availabilityText}
+              </div>
+            )}
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-white leading-none">
               Gabriel <span className="text-cyber-yellow">Fortier</span>
             </h1>
 
             <p className="text-xl sm:text-2xl font-bold text-cyber-blue font-mono">
-              Développeur Full-Stack & futur DevOps
+              {heroSubtitle}
             </p>
 
             <p className="text-text-muted text-base sm:text-lg leading-relaxed font-sans max-w-2xl">
-              Passionné par la conception d'applications web robustes, l'architecture logicielle et l'automatisation des déploiements. Je construis des solutions complètes de la base de données jusqu'à l'infrastructure.
+              {heroBio}
             </p>
+
 
             {/* CTA BUTTONS */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">

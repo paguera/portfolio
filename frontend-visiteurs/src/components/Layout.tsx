@@ -2,14 +2,17 @@ import React, { useEffect } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import PrivacyNotice from "./PrivacyNotice";
+import FloatingMiniPlayer from "./FloatingMiniPlayer";
 import { apiFetch } from "../utils/api";
 
 const Layout: React.FC = () => {
   const location = useLocation();
 
   const isSoundwavePage =
+    location.pathname === "/music" ||
     location.pathname.startsWith("/productions") ||
     location.pathname.startsWith("/audio");
+
 
   useEffect(() => {
     const trackVisitor = async () => {
@@ -53,8 +56,11 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
 
+      <FloatingMiniPlayer />
+
       <footer className="relative bg-cyber-cyan text-white border-t-4 border-bg-main py-8 px-4 md:px-8 text-center">
         <div className="flex flex-wrap justify-center items-center gap-6 mb-4 text-[12px] tracking-[0.2em] font-black uppercase">
+
           <a
             href="https://github.com/paguera"
             target="_blank"

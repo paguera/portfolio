@@ -5,7 +5,8 @@ import {
   getProjectsByCategory,
   createProject,
   updateProject,
-  deleteOneProject
+  deleteOneProject,
+  reorderProjects
 } from '../controllers/projects.controller.js'
 import {
   validateProjects,
@@ -19,7 +20,14 @@ const router = Router()
 
 router.get('/', getAllProjects)
 router.get('/category/:slug', getProjectsByCategory)
-router.get('/:id', validateId, validate, getOneProject)
+router.get('/slug/:id', getOneProject) // Peut être slug ou id
+router.get('/:id', getOneProject) // Accepte id numérique ou slug
+router.patch(
+  '/reorder',
+  authenticate,
+  authorize(['admin']),
+  reorderProjects
+)
 router.post(
   '/',
   authenticate,
@@ -45,4 +53,5 @@ router.delete(
   authorize(['admin']),
   deleteOneProject
 )
+
 export default router

@@ -1,6 +1,6 @@
 # Portfolio Monorepo
 
-Portfolio personnel Full-Stack & créatif regroupant l'ensemble des services : API Backend, application Visiteurs et panneau d'Administration.
+Portfolio personnel Full-Stack & créatif regroupant l'ensemble des services : API Backend, application Visiteurs et panneau d'Administration sécurisé.
 
 ---
 
@@ -9,19 +9,19 @@ Portfolio personnel Full-Stack & créatif regroupant l'ensemble des services : A
 ```text
 portfolio/
 ├── backend-express/       # API REST Express 5 & TypeScript
-│   ├── src/               # Code source (contrôleurs, modèles, routes, services)
-│   ├── scripts/           # Scripts utilitaires (création d'administrateur)
+│   ├── src/               # Code source (contrôleurs, modèles, routes, services, uploads)
+│   ├── scripts/           # Scripts utilitaires (création d'administrateur, seed)
 │   ├── Dockerfile         # Image Docker Node multi-stage
 │   └── .env.sample        # Modèle de configuration d'environnement
 │
 ├── frontend-visiteurs/    # Application Web publique (React 19 + Vite + Tailwind CSS)
-│   ├── src/               # Composants, pages, visualiseur audio Soundwave, galerie
+│   ├── src/               # Pages, visualiseur Soundwave, mini-lecteur audio, galerie d'art
 │   ├── public/            # Assets statiques, audios, images
 │   ├── Dockerfile         # Image Docker de build + Nginx
 │   └── .env.sample        # Modèle de variables d'environnement Vite
 │
 ├── frontend-admin/        # Dashboard de gestion (React 19 + Vite + Tailwind CSS)
-│   ├── src/               # Gestion des projets, catégories, technologies, auth
+│   ├── src/               # Gestion projets, galerie artworks, boîte de réception, télémétrie
 │   ├── Dockerfile         # Image Docker de build + Nginx
 │   └── .env.sample        # Modèle de variables d'environnement Vite
 │
@@ -31,6 +31,26 @@ portfolio/
 ├── docker-compose.yml     # Orchestration des services (DB, API, Frontends)
 └── README.md
 ```
+
+---
+
+## ✨ Fonctionnalités Principales
+
+### 🌐 Espace Public (Visiteurs)
+- **Fiches Projets Détaillées & Architecture** : Rendu Markdown avec coloration de code, liens démo et dépôts sources.
+- **Recherche & Filtres Avancés** : Filtrage interactif par technologie (React, Docker, PostgreSQL...) et recherche textuelle en temps réel.
+- **Lecteur Audio Persistant** : Contexte audio global (`AudioProvider`) permettant une écoute ininterrompue en naviguant sur tout le site avec un mini-lecteur flottant rétractable et raccourcis clavier (`Espace`).
+- **Laboratoire Musical & Visualiseur** : Visualiseur audio interactif avec stroboscope, analyseurs de fréquences stéréo et gestion de playlists.
+- **Galerie d'Art Contemporain** : Carrousel interactif d'œuvres et dessins avec affichage des techniques, dimensions et démarches.
+- **Télémétrie Respectueuse** : Mesure d'audience sans cookies tiers.
+
+### 🔐 Espace Administrateur (Privé & Sécurisé via Tailscale)
+- **Tableau de Bord Télémétrique** : Statistiques de fréquentation en direct, graphiques d'activité, top pages et top écoutes audio.
+- **Gestionnaire de Projets** : Éditeur Markdown avec prévisualisation en direct, réordonnancement par montée/descente, statuts public/brouillon et vedette (★).
+- **Gestionnaire de Galerie d'Art** : CRUD d'œuvres, réordonnancement du carrousel et téléversement direct de fichiers.
+- **Boîte de Réception (Contact Inbox)** : Sauvegarde PostgreSQL systématique des messages de formulaire de contact, badge de notification pour les non lus et réponse par e-mail en 1 clic.
+- **Téléversement de Médias Sécurisé** : Upload d'images (WebP, AVIF, PNG, JPEG, SVG) avec limitation à 10 Mo et hachage aléatoire contre le path traversal.
+- **Configuration Dynamique du Site** : Modification en direct du badge de disponibilité d'embauche, des textes d'accroche et de la bio.
 
 ---
 
@@ -152,21 +172,6 @@ Cette commande orchestre les 4 conteneurs :
 - **`portfolio-backend`** : API Node.js/Express 5 TypeScript multi-stage.
 - **`portfolio-visiteurs`** : Frontend public sous Nginx avec volume monté pour les fichiers audio.
 - **`portfolio-admin`** : Dashboard d'administration sous Nginx isolé sur son propre réseau et strictement exposé sur l'interface Tailscale (`${TAILSCALE_IP}:8080`), inaccessible depuis `nas-net` ou le réseau local.
-
-### 3. Build manuel individuel (optionnel)
-
-Si vous préférez compiler les images individuellement :
-
-```bash
-# Backend API
-docker build -t portfolio-backend ./backend-express
-
-# Frontend Visiteurs
-docker build --build-arg VITE_BASE_URL=https://api.example.com/api -t portfolio-visiteurs ./frontend-visiteurs
-
-# Frontend Admin
-docker build --build-arg VITE_BASE_URL=https://api.example.com -t portfolio-admin ./frontend-admin
-```
 
 ---
 

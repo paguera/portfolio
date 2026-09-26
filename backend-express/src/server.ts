@@ -13,7 +13,11 @@ import categoriesRoutes from "./routes/categories.routes.js";
 import technologiesRoutes from "./routes/technologies.routes.js";
 import ContactRoutes from "./routes/contact.routes.js";
 import visitorsRoutes from "./routes/visitors.routes.js";
+import artworksRoutes from "./routes/artworks.routes.js";
+import settingsRoutes from "./routes/settings.routes.js";
+import uploadRoutes, { uploadsDir } from "./routes/upload.routes.js";
 import { initVisitorsTable } from "./models/visitors.model.js";
+import { initSchema } from "./models/schema.js";
 
 dotenv.config();
 
@@ -30,8 +34,11 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "100kb" }));
+app.use(express.json({ limit: "500kb" }));
 app.use(cookieParser());
+
+// Serve static uploaded files
+app.use("/uploads", express.static(uploadsDir));
 
 const whitelist = [
   process.env.FRONT_URL,
@@ -41,6 +48,8 @@ const whitelist = [
   "http://nas:8080",
   "http://localhost:5002",
   "http://localhost:5003",
+  "http://localhost:5173",
+  "http://localhost:5174",
 ];
 
 const corsOptions: CorsOptions = {
@@ -91,9 +100,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoriesRoutes);
 app.use("/api/technologies", technologiesRoutes);
 app.use("/api/projects", projectsRoutes);
+app.use("/api/artworks", artworksRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/upload", uploadRoutes);
 app.use("/api/visitors", visitorsLimiter, visitorsRoutes);
 app.use("/api/contact", contactLimiter);
-app.use("/api/", ContactRoutes);
+app.use("/api", ContactRoutes);
 
 app.use(errorHandler);
 
@@ -108,9 +120,12 @@ async function startServer() {
   await initVisitorsTable().catch((err) =>
     console.error("Erreur lors de l'initialisation de la table visitors:", err)
   );
+  await initSchema().catch((err) =>
+    console.error("Erreur lors de l'initialisation du schéma général:", err)
+  );
   console.log(colorize("Démarrage du serveur...").yellow);
   app.listen(PORT, () => {
-    console.log(colorize("Serveur démarré").green);
+    console.log(colorize(`Serveur démarré sur le port ${PORT}`).green);
   });
 }
 startServer();

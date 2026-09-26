@@ -9,7 +9,7 @@ const validateProjects = [
     .withMessage('Titre requis')
     .isLength({ min: 2, max: 150 }),
 
-  body('description').isString().isLength({ max: 2000 }),
+  body('description').isString().isLength({ max: 5000 }),
 
   body('category_id')
     .custom(async value => {
@@ -38,15 +38,21 @@ const validateProjects = [
     .isArray()
     .withMessage('github_links doit être un tableau'),
   body('github_links.*.label')
+    .optional()
     .isString()
     .trim()
     .notEmpty()
     .withMessage('Le libellé du lien est requis'),
   body('github_links.*.url')
+    .optional()
     .isURL({ require_protocol: false, require_tld: false })
     .withMessage('L\'URL du lien est invalide'),
   body('demo_url').optional({ checkFalsy: true }).isURL({ require_protocol: false, require_tld: false }).withMessage('URL Démo invalide'),
-  body('image_url').isString().trim().notEmpty().withMessage('URL Image invalide')
+  body('image_url').isString().trim().notEmpty().withMessage('URL Image invalide'),
+  body('is_published').optional().isBoolean().withMessage('is_published doit être un booléen'),
+  body('is_featured').optional().isBoolean().withMessage('is_featured doit être un booléen'),
+  body('content_markdown').optional().isString().withMessage('content_markdown doit être une chaîne de caractères'),
+  body('slug').optional().isString().trim().withMessage('slug doit être une chaîne de caractères')
 ]
 
 const validateId = param('id')

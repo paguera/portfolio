@@ -18,11 +18,16 @@ export interface Project {
   id: number
   title: string
   description?: string
+  content_markdown?: string
+  slug?: string
   category_id: number
   category_name?: string
   github_url?: string
   demo_url?: string
   image_url?: string
+  is_published?: boolean
+  is_featured?: boolean
+  display_order?: number
   created_at: Date
   updated_at: Date
   technologies?: Technology[]
@@ -32,6 +37,22 @@ export interface Project {
     url: string
   }>
 }
+
+export interface Artwork {
+  id: number
+  title: string
+  artist: string
+  year: string
+  medium: string
+  dimensions: string
+  description: string
+  src?: string
+  image_url?: string
+  is_published?: boolean
+  display_order?: number
+}
+
+export type SiteSettings = Record<string, string>
 
 export interface AuthResponse {
   token: string

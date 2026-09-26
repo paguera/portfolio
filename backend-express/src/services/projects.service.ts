@@ -7,43 +7,40 @@ import {
   updateOne,
   removeOne,
   findByCategorySlug,
-  linkToProjectLinks
+  linkToProjectLinks,
+  updateDisplayOrders
 } from '../models/projects.model.js'
 import { linkToProject } from '../models/technologies.model.js'
 
 // CRUD
-const getOne = async (id: number): Promise<ProjectData | null> => {
-  const p = await findOne(id)
+const getOne = async (identifier: number | string): Promise<ProjectData | null> => {
+  const p = await findOne(identifier)
   if (!p) throw new AppError('Projet non trouvé', 404)
   return p
 }
 
-const getByCategory = async (slug: string): Promise<ProjectData[]> => {
-  return await findByCategorySlug(slug)
+const getByCategory = async (slug: string, onlyPublished = false): Promise<ProjectData[]> => {
+  return await findByCategorySlug(slug, onlyPublished)
 }
 
-const getAll = async (): Promise<ProjectData[] | null> => {
-  return await findAll()
+const getAll = async (onlyPublished = false): Promise<ProjectData[] | null> => {
+  return await findAll(onlyPublished)
 }
 
 /**
- * Création d'un projet avec ses technos.
+ * Création d'un projet avec ses technos et liens.
  */
 const create = async (project: ProjectData) => {
-  // 1. On crée le projet
   const newProject = await addOne(project)
   
-  // 2. Si on a des technos, on crée les liens
   if (project.technology_ids && project.technology_ids.length > 0) {
     await linkToProject(newProject.id, project.technology_ids)
   }
 
-  // 3. Si on a des liens github/dépôt, on les enregistre
   if (project.github_links) {
     await linkToProjectLinks(newProject.id, project.github_links)
   }
   
-  // On retourne le projet complet (avec technos et liens) en le relisant
   return await findOne(newProject.id)
 }
 
@@ -54,15 +51,12 @@ const update = async (id: number, project: ProjectData) => {
   const existing = await findOne(id)
   if (!existing) throw new AppError('Projet non trouvé', 404)
   
-  // 1. Mise à jour des infos de base
-  const updatedProject = await updateOne(id, project)
+  await updateOne(id, project)
   
-  // 2. Mise à jour des liens technos (remplacement total)
   if (project.technology_ids) {
     await linkToProject(id, project.technology_ids)
   }
 
-  // 3. Mise à jour des liens de dépôts (remplacement total)
   if (project.github_links) {
     await linkToProjectLinks(id, project.github_links)
   }
@@ -76,4 +70,11 @@ const deleteOne = async (id: number) => {
   return result
 }
 
-export { getOne, getAll, getByCategory, create, update, deleteOne }
+const reorder = async (items: Array<{ id: number; display_order: number }>) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new AppError('Liste de réordonnancement invalide', 400)
+  }
+  return await updateDisplayOrders(items)
+}
+
+export { getOne, getAll, getByCategory, create, update, deleteOne, reorder }

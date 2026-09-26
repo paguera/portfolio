@@ -165,4 +165,48 @@ CREATE INDEX IF NOT EXISTS idx_page_views_ip ON page_views (ip);
 CREATE INDEX IF NOT EXISTS idx_audio_plays_created_at ON audio_plays (created_at);
 CREATE INDEX IF NOT EXISTS idx_audio_plays_track_title ON audio_plays (track_title);
 
+-- -----------------------------------------------------------------------------
+-- 11. TABLES DES ARTWORKS, CONTACT ET PARAMÈTRES DU SITE
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS artworks (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    artist VARCHAR(255) DEFAULT 'GABRIEL VF',
+    year VARCHAR(50) DEFAULT '2026',
+    medium VARCHAR(255) DEFAULT 'Technique mixte',
+    dimensions VARCHAR(100) DEFAULT '21 x 29.7 cm',
+    description TEXT,
+    image_url VARCHAR(500) NOT NULL,
+    is_published BOOLEAN DEFAULT true,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_artworks_display_order ON artworks(display_order);
+CREATE INDEX IF NOT EXISTS idx_artworks_published ON artworks(is_published);
+
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    subject VARCHAR(255),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT false,
+    is_archived BOOLEAN DEFAULT false,
+    ip VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON contact_messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_is_read ON contact_messages(is_read);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_is_archived ON contact_messages(is_archived);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+
 
