@@ -74,7 +74,7 @@ services:
       - portfolio-admin-net
     ports:
       # Lie le frontadmin STRICTEMENT a l'IP Tailscale (tailscale0)
-      - "${TAILSCALE_IP:-100.80.76.84}:8080:80"
+      - "${TAILSCALE_IP:-127.0.0.1}:8080:80"
 
 volumes:
   portfolio-db-data:

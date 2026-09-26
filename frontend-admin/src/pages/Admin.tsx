@@ -215,7 +215,7 @@ const Admin: React.FC = () => {
             Admin_Dashboard.sys
           </h1>
           <p className='text-xs font-mono text-text-muted mt-2'>
-            Session administrateur sécurisée via Tailscale [100.80.76.84]
+            Session administrateur sécurisée via Tailscale
           </p>
         </div>
 

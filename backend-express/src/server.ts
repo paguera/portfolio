@@ -35,9 +35,9 @@ app.use(cookieParser());
 
 const whitelist = [
   process.env.FRONT_URL,
+  process.env.ADMIN_URL,
   "https://portfolio.paguera.fr",
   "https://paguera.fr",
-  "http://100.80.76.84:8080",
   "http://nas:8080",
   "http://localhost:5002",
   "http://localhost:5003",
@@ -49,7 +49,8 @@ const corsOptions: CorsOptions = {
       !origin ||
       whitelist.includes(origin) ||
       (origin && origin.endsWith(".duckdns.org")) ||
-      /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+      /^http:\/\/100\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin)
     ) {
       return callback(null, true);
     }
