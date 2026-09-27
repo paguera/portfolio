@@ -16,6 +16,7 @@ import visitorsRoutes from "./routes/visitors.routes.js";
 import artworksRoutes from "./routes/artworks.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 import uploadRoutes, { uploadsDir } from "./routes/upload.routes.js";
+import infraRoutes from "./routes/infra.routes.js";
 import { initVisitorsTable } from "./models/visitors.model.js";
 import { initSchema } from "./models/schema.js";
 
@@ -103,6 +104,7 @@ app.use("/api/projects", projectsRoutes);
 app.use("/api/artworks", artworksRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/infra", infraRoutes);
 app.use("/api/visitors", visitorsLimiter, visitorsRoutes);
 app.use("/api/contact", contactLimiter);
 app.use("/api", ContactRoutes);

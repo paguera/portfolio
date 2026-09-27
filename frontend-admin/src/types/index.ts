@@ -149,3 +149,52 @@ export interface VisitorAdvancedStats {
   operatingSystems: VisitorBreakdownItem[]
   recentVisits: RecentVisitItem[]
 }
+
+export interface TelemetryPoint {
+  time: number
+  value: number
+}
+
+export interface TelemetryData {
+  source: 'netdata' | 'system'
+  netdataOnline: boolean
+  cpuPercent: number
+  cpuHistory?: TelemetryPoint[]
+  ram: {
+    usedGiB: number
+    totalGiB: number
+    freeGiB: number
+    percent: number
+  }
+  ramHistory?: TelemetryPoint[]
+  disk: {
+    usedGiB: number
+    totalGiB: number
+    availGiB: number
+    percent: number
+  }
+  alarms: {
+    normal: number
+    warning: number
+    critical: number
+  }
+  osName: string
+  uptimeSeconds: number
+}
+
+export interface ServiceHealth {
+  id: string
+  name: string
+  category: 'public' | 'private'
+  role: string
+  mainUrl: string
+  secondaryUrl?: { label: string; url: string }
+  port?: number
+  checkUrl?: string
+  status: 'online' | 'offline'
+  latencyMs?: number
+  httpCode?: number
+  version?: string
+  lastChecked: string
+}
+

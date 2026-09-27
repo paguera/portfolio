@@ -173,17 +173,17 @@ const Contact: React.FC = () => {
                   htmlFor="sender"
                   className="block text-xs font-black uppercase tracking-[0.2em] text-primary"
                 >
-                  Email / Phone
+                  Email *
                 </label>
                 <input
-                  type="sender"
+                  type="email"
                   id="sender"
                   name="sender"
                   value={formData.sender}
                   onChange={handleChange}
                   required
                   className="w-full p-4 bg-bg-main border border-border-subtle focus:border-primary outline-none transition-colors font-mono text-text-main"
-                  placeholder="EMAIL / TÉLÉPHONE"
+                  placeholder="VOTRE EMAIL (ex: contact@domaine.fr)"
                 />
               </div>
             </div>
