@@ -5,11 +5,12 @@ import VisitorAnalytics from '../components/VisitorAnalytics'
 import ArtworksManager from '../components/ArtworksManager'
 import ContactInbox from '../components/ContactInbox'
 import SiteSettingsManager from '../components/SiteSettingsManager'
+import InfraControlCenter from '../components/InfraControlCenter'
 import FileUpload from '../components/FileUpload'
 import MarkdownEditor from '../components/MarkdownEditor'
 
 const Admin: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'analytics' | 'projects' | 'artworks' | 'messages' | 'settings'>('analytics')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'projects' | 'artworks' | 'messages' | 'settings' | 'infra'>('analytics')
   const [projects, setProjects] = useState<Project[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [technologies, setTechnologies] = useState<Technology[]>([])
@@ -276,7 +277,7 @@ const Admin: React.FC = () => {
             onClick={() => setActiveTab('analytics')}
             className={`px-3.5 py-2 transition-all cursor-pointer ${
               activeTab === 'analytics'
-                ? 'bg-secondary text-bg-main font-black shadow'
+                ? 'bg-cyber-blue text-black font-black shadow'
                 : 'text-text-muted hover:text-white'
             }`}
           >
@@ -287,7 +288,7 @@ const Admin: React.FC = () => {
             onClick={() => setActiveTab('projects')}
             className={`px-3.5 py-2 transition-all cursor-pointer ${
               activeTab === 'projects'
-                ? 'bg-primary text-bg-main font-black shadow'
+                ? 'bg-cyber-yellow text-black font-black shadow'
                 : 'text-text-muted hover:text-white'
             }`}
           >
@@ -298,7 +299,7 @@ const Admin: React.FC = () => {
             onClick={() => setActiveTab('artworks')}
             className={`px-3.5 py-2 transition-all cursor-pointer ${
               activeTab === 'artworks'
-                ? 'bg-pink-500 text-white font-black shadow'
+                ? 'bg-cyber-purple text-white font-black shadow'
                 : 'text-text-muted hover:text-white'
             }`}
           >
@@ -309,7 +310,7 @@ const Admin: React.FC = () => {
             onClick={() => setActiveTab('messages')}
             className={`px-3.5 py-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'messages'
-                ? 'bg-emerald-400 text-bg-main font-black shadow'
+                ? 'bg-emerald-400 text-black font-black shadow'
                 : 'text-text-muted hover:text-white'
             }`}
           >
@@ -325,14 +326,28 @@ const Admin: React.FC = () => {
             onClick={() => setActiveTab('settings')}
             className={`px-3.5 py-2 transition-all cursor-pointer ${
               activeTab === 'settings'
-                ? 'bg-cyber-cyan text-bg-main font-black shadow'
+                ? 'bg-gray-300 text-black font-black shadow'
                 : 'text-text-muted hover:text-white'
             }`}
           >
             🔧 Paramètres
           </button>
+          <button
+            type='button'
+            onClick={() => setActiveTab('infra')}
+            className={`px-3.5 py-2 transition-all cursor-pointer ${
+              activeTab === 'infra'
+                ? 'bg-cyber-yellow text-black font-black shadow'
+                : 'text-text-muted hover:text-white'
+            }`}
+          >
+            🖥 Infra &amp; Services
+          </button>
         </div>
       </div>
+
+      {/* Tab: Infra & Services */}
+      {activeTab === 'infra' && <InfraControlCenter />}
 
       {/* Tab: Analytics */}
       {activeTab === 'analytics' && <VisitorAnalytics />}

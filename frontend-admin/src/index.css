@@ -9,6 +9,10 @@
   --color-text-main: var(--color-text-main);
   --color-text-muted: var(--color-text-muted);
   --color-border-subtle: var(--color-border-subtle);
+  --color-cyber-cyan: var(--cyber-cyan);
+  --color-cyber-purple: var(--cyber-purple);
+  --color-cyber-blue: var(--cyber-blue);
+  --color-cyber-yellow: var(--cyber-yellow);
 }
 
 .tiptap {
@@ -27,9 +31,9 @@
   }
 }
 
-@layer base {
-  body {
-    background-color: var(--color-bg-main);
-    color: var(--color-text-main);
-  }
+body {
+  @apply bg-bg-main text-text-main;
+  background-image: url("/temple.svg"), radial-gradient(circle at top right, #2b2e38, #181a20 60%);
+  background-size: 7%, auto;
+  background-attachment: scroll, fixed;
 }

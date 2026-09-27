@@ -2,32 +2,35 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const Navbar = () => {
-  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 md:gap-4 items-center border-bg-main/20 md:border-t-0 md:border-bg-main pt-8 md:pt-0 md:pl-8 w-full md:w-auto">
+    <div className="flex items-center gap-4">
       {isAuthenticated ? (
-        <>
-          {isAdmin && (
-            <Link to="/admin" className="text-black hover:opacity-70">
-              Admin
-            </Link>
-          )}
+        <div className="flex items-center gap-3">
+          <a
+            href="https://paguera.fr"
+            target="_blank"
+            rel="noreferrer"
+            className="text-text-muted hover:text-cyber-yellow text-xs font-mono font-bold uppercase transition-colors hidden sm:inline-flex items-center gap-1"
+          >
+            <span>Site public</span> ↗
+          </a>
           <button
             onClick={handleLogout}
-            className="text-black font-black tracking-tighter"
+            className="px-3 py-1.5 border border-red-500/40 bg-red-950/30 text-red-400 hover:bg-red-500 hover:text-white text-xs font-mono font-bold tracking-wider uppercase transition-all cursor-pointer rounded-sm"
           >
             [ SIGNOFF ]
           </button>
-        </>
+        </div>
       ) : (
         <Link
           to="/"
-          className="text-black transition-colors font-black tracking-tighter"
+          className="text-cyber-yellow hover:underline transition-colors font-mono font-bold text-xs uppercase tracking-wider"
         >
           [ LOGIN ]
         </Link>
@@ -35,4 +38,5 @@ const Navbar = () => {
     </div>
   );
 };
+
 export default Navbar;
