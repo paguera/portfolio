@@ -36,13 +36,15 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - MAIL_USER=${MAIL_USER}
       - MAIL_PASS=${MAIL_PASS}
-      - MAIL_TO=${MAIL_TO}
+    volumes:
+      - ./backend-express/uploads:/app/uploads:z
     networks:
       - nas-net
-    ports:
-      - "${PORT_BACKEND:-3000}:3000"
+#    ports:
+#      - "${PORT_BACKEND:-3000}:3000"
     depends_on:
-      - portfolio-db
+      portfolio-db:
+        condition: service_healthy
 
   # --- PORTFOLIO: FRONTEND VISITEURS ---
   portfolio-visiteurs:
@@ -59,8 +61,8 @@ services:
       - ./frontend-visiteurs/public/audio:/usr/share/nginx/html/audio:ro,z
     networks:
       - nas-net
-    ports:
-      - "${PORT_VISITEURS:-5173}:80"
+#    ports:
+#      - "${PORT_VISITEURS:-5173}:80"
 
   # --- PORTFOLIO: FRONTEND ADMIN ---
   portfolio-admin:
@@ -76,7 +78,8 @@ services:
     networks:
       - portfolio-admin-net
     ports:
-      - "${PORT_ADMIN:-8080}:80"
+      # Lie le frontadmin STRICTEMENT a l'IP Tailscale (tailscale0)
+      - "${TAILSCALE_IP:-127.0.0.1}:8080:80"
 
 
 volumes:

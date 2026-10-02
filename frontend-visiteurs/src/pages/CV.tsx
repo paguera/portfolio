@@ -123,7 +123,7 @@ const CV: React.FC = () => {
         <title>Curriculum Vitæ & Parcours | Gabriel Fortier</title>
         <meta
           name="description"
-          content="Curriculum Vitæ interactif de Gabriel Fortier (Paguera) - Développeur Full-Stack & DevOps basé à Lyon. Expériences, formations, compétences et carte de mobilité."
+          content="Curriculum Vitæ interactif de Gabriel Fortier (Paguera) - Développeur Full-Stack basé à Lyon. Expériences, formations, compétences et carte de mobilité."
         />
       </Helmet>
 
@@ -140,7 +140,7 @@ const CV: React.FC = () => {
           </h1>
 
           <p className="text-base sm:text-xl font-bold text-gray-400 font-mono max-w-2xl mx-auto">
-            Développeur Full-Stack & DevOps · Conception Web, API & Architecture Cloud · Basé à Lyon
+            Développeur Full-Stack · Conception Web & API · Basé à Lyon
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
