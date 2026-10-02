@@ -48,9 +48,42 @@ export interface Artwork {
   image_url: string
   is_published: boolean
   display_order: number
+  average_rating?: number
+  rating_count?: number
   created_at?: string
   updated_at?: string
 }
+
+export interface ArtworkCommentAdmin {
+  id: number
+  artwork_id: number
+  artwork_title?: string
+  author_name: string
+  comment: string
+  is_approved: boolean
+  visitor_uuid: string
+  ip: string
+  created_at: string
+}
+
+export interface TrackCommentAdmin {
+  id: number
+  track_id: string
+  author_name: string
+  comment: string
+  is_approved: boolean
+  visitor_uuid: string
+  ip: string
+  created_at: string
+}
+
+export interface TrackRatingStatsAdmin {
+  track_id: string
+  average_rating: number
+  rating_count: number
+}
+
+
 
 export interface ContactMessage {
   id: number

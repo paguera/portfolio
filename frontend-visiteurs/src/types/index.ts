@@ -50,6 +50,22 @@ export interface Artwork {
   image_url?: string
   is_published?: boolean
   display_order?: number
+  average_rating?: number
+  rating_count?: number
+}
+
+export interface ArtworkComment {
+  id: number
+  artwork_id: number
+  author_name: string
+  comment: string
+  is_approved?: boolean
+  created_at: string
+}
+
+export interface RatingStats {
+  average_rating: number
+  rating_count: number
 }
 
 export type SiteSettings = Record<string, string>
@@ -57,3 +73,4 @@ export type SiteSettings = Record<string, string>
 export interface AuthResponse {
   token: string
 }
+

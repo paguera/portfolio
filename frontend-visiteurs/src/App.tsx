@@ -8,6 +8,7 @@ import Contact from "./pages/Contact";
 import Liens from "./pages/Liens";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import CV from "./pages/CV";
 import Productions from "./pages/Productions";
 import Artwork from "./pages/Artwork";
 import { WelcomeSplash } from "./components/WelcomeSplash";
@@ -33,6 +34,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="cv" element={<CV />} />
             <Route path="artwork" element={<Artwork />} />
             <Route path="music" element={<Productions />} />
             <Route path="projects" element={<Projects />} />

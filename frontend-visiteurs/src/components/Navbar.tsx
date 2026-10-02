@@ -120,6 +120,17 @@ const Navbar: React.FC = () => {
             </NavLink>
           </li>
 
+          {/* CV & PARCOURS */}
+          <li>
+            <NavLink
+              to="/cv"
+              className={navLinkClass}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              CV / PARCOURS
+            </NavLink>
+          </li>
+
           {/* LAB CRÉATIF Dropdown */}
           <li
             ref={creativeDropdownRef}

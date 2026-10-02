@@ -208,5 +208,65 @@ CREATE TABLE IF NOT EXISTS site_settings (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- -----------------------------------------------------------------------------
+-- 12. TABLES DES NOTATIONS ET COMMENTAIRES DU LAB CRÉATIF
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS artwork_ratings (
+    id SERIAL PRIMARY KEY,
+    artwork_id INTEGER NOT NULL REFERENCES artworks(id) ON DELETE CASCADE,
+    rating SMALLINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    visitor_uuid VARCHAR(255) NOT NULL,
+    ip VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_visitor_artwork_rating UNIQUE (artwork_id, visitor_uuid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_artwork_ratings_artwork_id ON artwork_ratings(artwork_id);
+
+CREATE TABLE IF NOT EXISTS artwork_comments (
+    id SERIAL PRIMARY KEY,
+    artwork_id INTEGER NOT NULL REFERENCES artworks(id) ON DELETE CASCADE,
+    author_name VARCHAR(100) NOT NULL DEFAULT 'Visiteur',
+    comment TEXT NOT NULL,
+    is_approved BOOLEAN DEFAULT true,
+    visitor_uuid VARCHAR(255) NOT NULL,
+    ip VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_artwork_comments_artwork_id ON artwork_comments(artwork_id);
+CREATE INDEX IF NOT EXISTS idx_artwork_comments_approved ON artwork_comments(is_approved);
+
+-- -----------------------------------------------------------------------------
+-- 13. TABLES DES NOTATIONS ET COMMENTAIRES DES MUSIQUES (TRACKS)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS track_ratings (
+    id SERIAL PRIMARY KEY,
+    track_id VARCHAR(255) NOT NULL,
+    rating SMALLINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    visitor_uuid VARCHAR(255) NOT NULL,
+    ip VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_visitor_track_rating UNIQUE (track_id, visitor_uuid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_track_ratings_track_id ON track_ratings(track_id);
+
+CREATE TABLE IF NOT EXISTS track_comments (
+    id SERIAL PRIMARY KEY,
+    track_id VARCHAR(255) NOT NULL,
+    author_name VARCHAR(100) NOT NULL DEFAULT 'Visiteur',
+    comment TEXT NOT NULL,
+    is_approved BOOLEAN DEFAULT true,
+    visitor_uuid VARCHAR(255) NOT NULL,
+    ip VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_track_comments_track_id ON track_comments(track_id);
+CREATE INDEX IF NOT EXISTS idx_track_comments_approved ON track_comments(is_approved);
+
+
+
 
 

@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import UnifiedVisualizer from "./UnifiedVisualizer";
 import Playlist from "./Playlist";
+import TrackFeedback from "./TrackFeedback";
 import { useAudio } from "../../context/AudioContext";
+
 import "./soundwave.css";
 
 const SoundwaveApp: React.FC = () => {
@@ -235,6 +237,9 @@ const SoundwaveApp: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Track Rating and Comments Section */}
+            {currentTrack && <TrackFeedback currentTrack={currentTrack} />}
           </section>
 
           {/* Playlist Sidebar / Manager */}

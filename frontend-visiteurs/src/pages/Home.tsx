@@ -74,6 +74,12 @@ const Home: React.FC = () => {
                 Explorer mes projets Dev
               </Link>
               <Link
+                to="/cv"
+                className="px-6 py-3 border-2 border-cyber-yellow/60 hover:border-cyber-yellow text-cyber-yellow hover:bg-cyber-yellow hover:text-black font-black uppercase text-xs tracking-widest transition-all bg-bg-panel/50 shadow-md"
+              >
+                CV & Parcours
+              </Link>
+              <Link
                 to="/category/devops"
                 className="px-6 py-3 border-2 border-white/20 hover:border-cyber-blue text-white hover:text-cyber-blue font-black uppercase text-xs tracking-widest transition-all bg-bg-panel/50"
               >
@@ -123,6 +129,15 @@ const Home: React.FC = () => {
               <p>
                 Aujourd'hui, j'approfondis naturellement ma démarche vers l'<strong>écosystème DevOps & Cloud</strong> afin de maîtriser le cycle de vie applicatif de bout en bout.
               </p>
+              <div className="pt-2">
+                <Link
+                  to="/cv"
+                  className="text-xs font-mono font-bold uppercase tracking-wider text-cyber-yellow hover:underline inline-flex items-center gap-1.5"
+                >
+                  <span>Consulter le CV & Parcours complet</span>
+                  <span>→</span>
+                </Link>
+              </div>
             </div>
           </div>
 

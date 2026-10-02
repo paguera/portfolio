@@ -3,6 +3,7 @@ import type { Project, Category, Technology, ContactMessagesResponse } from '../
 import apiFetch from '../utils/api'
 import VisitorAnalytics from '../components/VisitorAnalytics'
 import ArtworksManager from '../components/ArtworksManager'
+import LabModeration from '../components/LabModeration'
 import ContactInbox from '../components/ContactInbox'
 import SiteSettingsManager from '../components/SiteSettingsManager'
 import InfraControlCenter from '../components/InfraControlCenter'
@@ -10,7 +11,8 @@ import FileUpload from '../components/FileUpload'
 import MarkdownEditor from '../components/MarkdownEditor'
 
 const Admin: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'analytics' | 'projects' | 'artworks' | 'messages' | 'settings' | 'infra'>('analytics')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'projects' | 'artworks' | 'lab' | 'messages' | 'settings' | 'infra'>('analytics')
+
   const [projects, setProjects] = useState<Project[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [technologies, setTechnologies] = useState<Technology[]>([])
@@ -307,6 +309,17 @@ const Admin: React.FC = () => {
           </button>
           <button
             type='button'
+            onClick={() => setActiveTab('lab')}
+            className={`px-3.5 py-2 transition-all cursor-pointer ${
+              activeTab === 'lab'
+                ? 'bg-cyber-yellow text-black font-black shadow'
+                : 'text-text-muted hover:text-white'
+            }`}
+          >
+            ⭐ Avis &amp; Lab
+          </button>
+          <button
+            type='button'
             onClick={() => setActiveTab('messages')}
             className={`px-3.5 py-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'messages'
@@ -354,6 +367,9 @@ const Admin: React.FC = () => {
 
       {/* Tab: Artworks */}
       {activeTab === 'artworks' && <ArtworksManager />}
+
+      {/* Tab: Lab Moderation */}
+      {activeTab === 'lab' && <LabModeration />}
 
       {/* Tab: Messages */}
       {activeTab === 'messages' && (
