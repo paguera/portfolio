@@ -1,11 +1,11 @@
-FROM docker.io/library/node:20-alpine AS builder
+FROM docker.io/library/node:22-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
 RUN node node_modules/typescript/bin/tsc
 
-FROM docker.io/library/node:20-alpine
+FROM docker.io/library/node:22-alpine
 WORKDIR /app
 COPY --from=builder /app/package*.json ./
 RUN npm install --omit=dev
