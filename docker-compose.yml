@@ -59,6 +59,8 @@ services:
       - VITE_BASE_URL=${VITE_BASE_URL_VISITEURS}
     volumes:
       - ./frontend-visiteurs/public/audio:/usr/share/nginx/html/audio:ro,z
+      - ./backend-express/uploads:/usr/share/nginx/html/uploads:ro,z
+      - ./frontend-visiteurs/nginx.conf:/etc/nginx/conf.d/default.conf:ro,z
     networks:
       - nas-net
 #    ports:
@@ -75,6 +77,9 @@ services:
     restart: always
     environment:
       - VITE_BASE_URL=${VITE_BASE_URL_ADMIN}
+    volumes:
+      - ./backend-express/uploads:/usr/share/nginx/html/uploads:ro,z
+      - ./frontend-admin/nginx.conf:/etc/nginx/conf.d/default.conf:ro,z
     networks:
       - portfolio-admin-net
     ports:

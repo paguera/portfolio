@@ -130,6 +130,9 @@ const CategoryProjects: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/LOGO.avif";
+                    }}
                   />
                   {/* Badge d'agrandissement au survol */}
                   <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm border border-white/20 px-2 py-1 rounded text-[10px] font-mono text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 pointer-events-none">
@@ -268,6 +271,9 @@ const CategoryProjects: React.FC = () => {
               src={lightboxImage.src}
               alt={lightboxImage.title}
               className="max-h-[80vh] w-auto max-w-full object-contain rounded select-none"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/LOGO.avif";
+              }}
             />
           </div>
         </div>

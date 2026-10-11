@@ -283,6 +283,9 @@ const Projects: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/LOGO.avif";
+                    }}
                   />
                   {/* Category Pill Tag */}
                   {article.category_name && (
@@ -451,6 +454,9 @@ const Projects: React.FC = () => {
               src={lightboxImage.src}
               alt={lightboxImage.title}
               className="max-h-[80vh] w-auto max-w-full object-contain rounded select-none"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/LOGO.avif";
+              }}
             />
           </div>
         </div>

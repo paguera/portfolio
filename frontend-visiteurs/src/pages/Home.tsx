@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import type { SiteSettings } from "../types";
 import { apiFetch } from "../utils/api";
+import profilePhoto from "../assets/gab.jpeg";
 
 const Home: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings>({
@@ -98,7 +99,7 @@ const Home: React.FC = () => {
           <div className="relative group shrink-0">
             <div className="w-44 h-44 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-4 border-cyber-yellow/40 shadow-2xl relative z-10 bg-bg-panel group-hover:scale-105 transition-transform duration-500">
               <img
-                src="/gab.jpeg"
+                src={profilePhoto}
                 alt="Gabriel Fortier"
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                 onError={(e) => {
