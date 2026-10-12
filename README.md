@@ -1,10 +1,10 @@
-# Portfolio Monorepo
+# Portfolio monorepo
 
 Portfolio personnel Full-Stack & créatif regroupant l'ensemble des services : API Backend, application Visiteurs et panneau d'Administration sécurisé.
 
 ---
 
-## 🏗️ Structure du Projet
+## Structure du projet
 
 ```text
 portfolio/
@@ -34,9 +34,9 @@ portfolio/
 
 ---
 
-## ✨ Fonctionnalités Principales
+## Fonctionnalités principales
 
-### 🌐 Espace Public (Visiteurs)
+### Espace public (visiteurs)
 - **Fiches Projets Détaillées & Architecture** : Rendu Markdown avec coloration de code, liens démo et dépôts sources.
 - **Recherche & Filtres Avancés** : Filtrage interactif par technologie (React, Docker, PostgreSQL...) et recherche textuelle en temps réel.
 - **Lecteur Audio Persistant** : Contexte audio global (`AudioProvider`) permettant une écoute ininterrompue en naviguant sur tout le site avec un mini-lecteur flottant rétractable et raccourcis clavier (`Espace`).
@@ -44,7 +44,7 @@ portfolio/
 - **Galerie d'Art Contemporain** : Carrousel interactif d'œuvres et dessins avec affichage des techniques, dimensions et démarches.
 - **Télémétrie Respectueuse** : Mesure d'audience sans cookies tiers.
 
-### 🔐 Espace Administrateur (Privé & Sécurisé via Tailscale)
+### Espace administrateur (privé & sécurisé via Tailscale)
 - **Tableau de Bord Télémétrique** : Statistiques de fréquentation en direct, graphiques d'activité, top pages et top écoutes audio.
 - **Gestionnaire de Projets** : Éditeur Markdown avec prévisualisation en direct, réordonnancement par montée/descente, statuts public/brouillon et vedette (★).
 - **Gestionnaire de Galerie d'Art** : CRUD d'œuvres, réordonnancement du carrousel et téléversement direct de fichiers.
@@ -54,7 +54,7 @@ portfolio/
 
 ---
 
-## ⚙️ Prérequis
+## Prérequis
 
 - **Node.js** >= 20.x
 - **PostgreSQL** >= 15.x
@@ -62,7 +62,7 @@ portfolio/
 
 ---
 
-## 🚀 Installation & Développement Local
+## Installation & développement local
 
 ### 1. Backend (`backend-express`)
 
@@ -84,7 +84,7 @@ npm run create-admin
 npm run dev
 ```
 
-### 2. Frontend Visiteurs (`frontend-visiteurs`)
+### 2. Frontend visiteurs (`frontend-visiteurs`)
 
 ```bash
 cd frontend-visiteurs
@@ -98,7 +98,7 @@ cp .env.sample .env
 npm run dev
 ```
 
-### 3. Frontend Admin (`frontend-admin`)
+### 3. Frontend admin (`frontend-admin`)
 
 ```bash
 cd frontend-admin
@@ -114,7 +114,7 @@ npm run dev
 
 ---
 
-## 🔐 Variables d'Environnement
+## Variables d'environnement
 
 ### `backend-express/.env`
 | Variable | Description | Exemple |
@@ -143,7 +143,7 @@ npm run dev
 
 ---
 
-## 🐳 Déploiement Containerisé (Docker / Podman)
+## Déploiement containerisé (Docker / Podman)
 
 L'application est entièrement orchestrée via `docker-compose.yml` (compatible Docker et Podman).
 
@@ -175,6 +175,6 @@ Cette commande orchestre les 4 conteneurs :
 
 ---
 
-## 📜 Licence
+## Licence
 
 Projet sous licence GNU General Public License v3.0 (GPL-3.0). Consultez le fichier [LICENSE](LICENSE) pour plus de détails.

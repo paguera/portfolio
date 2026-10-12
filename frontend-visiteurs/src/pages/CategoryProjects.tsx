@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
 import { Helmet } from 'react-helmet-async';
 import type { Project } from "../types";
 import { apiFetch } from "../utils/api";
@@ -27,6 +27,8 @@ const getLinkBadge = (label: string): { tag: string; colorClass: string } => {
 const CategoryProjects: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [articles, setArticles] = useState<Project[]>([]);
+  const [selectedTech, setSelectedTech] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string } | null>(null);
 
@@ -36,7 +38,7 @@ const CategoryProjects: React.FC = () => {
       setLoading(true);
       try {
         const data: Project[] = await apiFetch<Project[]>(`/projects/category/${slug}`);
-        setArticles(data);
+        setArticles(data || []);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Erreur inconnue";
         console.error("Erreur lors du chargement des projets :", message, error);
@@ -67,6 +69,37 @@ const CategoryProjects: React.FC = () => {
     };
   }, [lightboxImage, handleKeyDown]);
 
+  const availableTechnologies = useMemo(() => {
+    const map = new Map<string, number>();
+    articles.forEach((p) => {
+      p.technologies?.forEach((t) => {
+        map.set(t.name, (map.get(t.name) || 0) + 1);
+      });
+    });
+    return Array.from(map.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [articles]);
+
+  const filteredArticles = articles.filter((project) => {
+    if (selectedTech) {
+      const hasTech = project.technologies?.some(
+        (t) => t.name.toLowerCase() === selectedTech.toLowerCase()
+      );
+      if (!hasTech) return false;
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchTitle = project.title.toLowerCase().includes(q);
+      const matchDesc = project.description?.toLowerCase().includes(q) || false;
+      const matchTech = project.technologies?.some((t) => t.name.toLowerCase().includes(q)) || false;
+      if (!matchTitle && !matchDesc && !matchTech) return false;
+    }
+
+    return true;
+  });
+
   if (loading)
     return (
       <div className="text-center py-20 uppercase tracking-widest animate-pulse font-mono text-cyber-yellow">
@@ -79,7 +112,7 @@ const CategoryProjects: React.FC = () => {
   return (
     <div className="space-y-8">
       <Helmet>
-        <title>{`${slug?.toUpperCase()} | GVF Portfolio`}</title>
+        <title>{`${isDevopsCategory ? "DevOps & Infrastructure" : slug?.toUpperCase()} | GVF Portfolio`}</title>
         <meta
           name="description"
           content={`Découvrez mes projets et architectures dans la catégorie ${slug}.`}
@@ -103,13 +136,79 @@ const CategoryProjects: React.FC = () => {
         )}
       </div>
 
+      {/* Search Bar & Tech Filters */}
+      <div className="bg-bg-panel/60 border border-border-subtle p-4 rounded-xl space-y-4 shadow-lg">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative grow">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-mono text-xs">
+              🔍
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher par mot-clé, techno (Docker, Ansible, CI/CD)..."
+              className="w-full bg-bg-main border border-border-subtle pl-9 pr-4 py-2.5 outline-none focus:border-cyber-yellow text-text-main font-mono text-xs rounded"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {(selectedTech || searchQuery) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedTech(null);
+                setSearchQuery("");
+              }}
+              className="px-3 py-2 text-xs font-mono font-bold text-red-400 hover:text-red-300 border border-red-500/30 rounded uppercase tracking-wider"
+            >
+              Réinitialiser les filtres
+            </button>
+          )}
+        </div>
+
+        {availableTechnologies.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-border-subtle/50">
+            <span className="text-[10px] font-mono uppercase text-gray-500 mr-1 font-bold">
+              Filtrer par stack :
+            </span>
+            {availableTechnologies.map((tech) => {
+              const isSelected = selectedTech?.toLowerCase() === tech.name.toLowerCase();
+              return (
+                <button
+                  key={tech.name}
+                  onClick={() => setSelectedTech(isSelected ? null : tech.name)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-cyber-blue text-black font-black border border-cyber-blue shadow"
+                      : "bg-bg-main text-gray-400 border border-border-subtle hover:border-cyber-blue hover:text-white"
+                  }`}
+                >
+                  {tech.name} ({tech.count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
-        {articles.map((article) => {
+        {filteredArticles.map((article) => {
+          const detailUrl = `/projects/${article.slug || article.id}`;
+
           return (
             <article
               key={article.id}
-              className="bg-bg-panel border-2 border-border-subtle group hover:border-secondary transition-all duration-300 flex flex-col h-full shadow-[8px_8px_0px_0px_rgba(0,242,254,0.15)] hover:shadow-[8px_8px_0px_0px_rgba(0,242,254,0.35)]"
+              className="bg-bg-panel border-2 border-border-subtle group hover:border-secondary transition-all duration-300 flex flex-col h-full shadow-[8px_8px_0px_0px_rgba(0,242,254,0.15)] hover:shadow-[8px_8px_0px_0px_rgba(0,242,254,0.35)] rounded-sm overflow-hidden"
             >
               {article.image_url && (
                 <div
@@ -134,7 +233,19 @@ const CategoryProjects: React.FC = () => {
                       (e.target as HTMLImageElement).src = "/LOGO.avif";
                     }}
                   />
-                  {/* Badge d'agrandissement au survol */}
+
+                  {article.category_name && (
+                    <div className="absolute top-2 left-2 bg-black/85 backdrop-blur-sm border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-cyber-yellow uppercase font-bold">
+                      {article.category_name}
+                    </div>
+                  )}
+
+                  {article.is_featured && (
+                    <div className="absolute top-2 right-2 bg-cyber-yellow text-black px-2 py-0.5 rounded text-[10px] font-mono uppercase font-black">
+                      ★ Vedette
+                    </div>
+                  )}
+
                   <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm border border-white/20 px-2 py-1 rounded text-[10px] font-mono text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 pointer-events-none">
                     <span>🔍</span>
                     <span>Agrandir</span>
@@ -142,46 +253,61 @@ const CategoryProjects: React.FC = () => {
                 </div>
               )}
 
-              <div className="p-6 md:p-8 flex flex-col grow">
-                <h2 className="text-xl md:text-2xl font-black mb-3 uppercase tracking-tight text-white group-hover:text-cyber-yellow transition-colors">
-                  {article.title}
-                </h2>
+              <div className="p-6 flex flex-col grow">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <Link to={detailUrl}>
+                    <h2 className="text-xl font-black uppercase tracking-tight text-white group-hover:text-cyber-yellow transition-colors">
+                      {article.title}
+                    </h2>
+                  </Link>
+                </div>
 
                 <p className="text-xs sm:text-sm leading-relaxed mb-6 font-mono text-text-muted">
                   {article.description}
                 </p>
 
-                <div className="space-y-5 pt-4 border-t border-border-subtle/50 mt-auto">
+                <div className="space-y-4 pt-4 border-t border-border-subtle/50 mt-auto">
                   {/* Technologies */}
                   {article.technologies && article.technologies.length > 0 && (
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-secondary">
-                        Stack & Outils
+                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-secondary font-mono">
+                        Stack &amp; Outils
                       </h4>
                       <div className="flex flex-wrap gap-1.5">
                         {article.technologies.map((tech) => (
-                          <span
+                          <button
+                            type="button"
                             key={tech.id}
-                            className="text-[9px] font-mono uppercase bg-bg-main px-2 py-1 border border-border-subtle text-gray-300 font-bold"
+                            onClick={() => setSelectedTech(tech.name)}
+                            className="text-[9px] font-mono uppercase bg-bg-main px-2 py-0.5 border border-border-subtle text-gray-300 font-bold hover:border-cyber-blue hover:text-white transition-colors cursor-pointer"
+                            title={`Filtrer par ${tech.name}`}
                           >
                             {tech.name}
-                          </span>
+                          </button>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Liens Github / Architecture / Démo */}
+                  {/* Links Row: Details + Demo + GitHub */}
                   <div className="flex flex-col gap-2 pt-2">
+                    <Link
+                      to={detailUrl}
+                      className="flex items-center justify-between border-2 border-cyber-yellow text-cyber-yellow hover:bg-cyber-yellow hover:text-black p-2.5 text-xs font-black uppercase tracking-widest transition-all font-mono"
+                    >
+                      <span>Fiche Détaillée &amp; Architecture</span>
+                      <span>📖 →</span>
+                    </Link>
+
                     {article.demo_url && (
                       <a
                         href={article.demo_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between border border-border-subtle p-2.5 text-xs font-black uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all text-text-main bg-bg-main/40"
+                        className="flex items-center justify-between border border-border-subtle p-2 text-xs font-black uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all text-text-main bg-bg-main/40 font-mono"
                       >
                         <span>Lancer la démo</span>
-                        <span className="text-[10px] font-mono text-cyber-cyan">[demo]</span>
+                        <span className="text-[10px] text-cyber-cyan">[demo]</span>
                       </a>
                     )}
 
@@ -194,10 +320,10 @@ const CategoryProjects: React.FC = () => {
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-between border border-border-subtle p-2.5 text-xs font-black uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all text-text-main bg-bg-main/40"
+                            className="flex items-center justify-between border border-border-subtle p-2 text-xs font-black uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all text-text-main bg-bg-main/40 font-mono"
                           >
-                            <span className="truncate pr-2">{link.label || 'Code Source'}</span>
-                            <span className={`text-[10px] font-mono shrink-0 ${badge.colorClass}`}>
+                            <span className="truncate pr-2">{link.label || "Code Source"}</span>
+                            <span className={`text-[10px] ${badge.colorClass}`}>
                               {badge.tag}
                             </span>
                           </a>
@@ -209,10 +335,10 @@ const CategoryProjects: React.FC = () => {
                           href={article.github_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-between border border-border-subtle p-2.5 text-xs font-black uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all text-text-main bg-bg-main/40"
+                          className="flex items-center justify-between border border-border-subtle p-2 text-xs font-black uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all text-text-main bg-bg-main/40 font-mono"
                         >
                           <span>Code Source</span>
-                          <span className="text-[10px] font-mono text-gray-400">[code]</span>
+                          <span className="text-[10px] text-gray-400">[code]</span>
                         </a>
                       )
                     )}
@@ -223,7 +349,7 @@ const CategoryProjects: React.FC = () => {
           );
         })}
 
-        {articles.length === 0 && (
+        {filteredArticles.length === 0 && (
           <div className="col-span-full text-center py-20 border-2 border-dashed border-border-subtle rounded-xl p-8 space-y-4">
             <p className="font-mono text-sm text-gray-400 uppercase tracking-widest">
               404_PROJECTS_NOT_FOUND: no entries for category "{slug}"
@@ -232,6 +358,17 @@ const CategoryProjects: React.FC = () => {
               <p className="text-xs text-text-muted font-sans max-w-md mx-auto">
                 Les projets d'infrastructure et d'automatisation sont en cours d'intégration.
               </p>
+            )}
+            {(selectedTech || searchQuery) && (
+              <button
+                onClick={() => {
+                  setSelectedTech(null);
+                  setSearchQuery("");
+                }}
+                className="px-4 py-2 bg-cyber-yellow text-black font-mono font-bold text-xs uppercase rounded"
+              >
+                Réinitialiser les filtres
+              </button>
             )}
           </div>
         )}
