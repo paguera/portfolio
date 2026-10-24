@@ -1,4 +1,4 @@
-FROM docker.io/library/node:22.23.4-alpine AS builder
+FROM docker.io/library/node:22.23.4-alpine AS build
 ARG VITE_BASE_URL
 WORKDIR /app
 COPY package*.json ./
