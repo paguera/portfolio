@@ -113,50 +113,50 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* PARCOURS & MOTIVATION */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div className="bg-bg-panel/40 border border-border-subtle p-8 rounded-xl space-y-4 relative overflow-hidden">
-            <div className="w-1.5 h-8 bg-cyber-yellow absolute top-8 left-0"></div>
-            <h2 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-3">
-              Mon Parcours
-            </h2>
-            <div className="text-sm font-sans text-text-muted leading-relaxed space-y-3">
-              <p>
-                Issu d'un univers où la créativité et la rigueur se croisent (musique, art contemporain, conception), j'ai orienté mon expertise vers le <strong>développement web et logiciel</strong>.
-              </p>
-              <p>
-                Formé sur les stacks modernes (React, TypeScript, Node.js, PostgreSQL), j'ai développé une sensibilité poussée pour la qualité de code, l'architecture d'API REST sécurisée et l'optimisation des performances.
-              </p>
-              <p>
-                Aujourd'hui, j'approfondis naturellement ma démarche vers l'<strong>écosystème DevOps & Cloud</strong> afin de maîtriser le cycle de vie applicatif de bout en bout.
-              </p>
-              <div className="pt-2">
-                <Link
-                  to="/cv"
-                  className="text-xs font-mono font-bold uppercase tracking-wider text-cyber-yellow hover:underline inline-flex items-center gap-1.5"
-                >
-                  <span>Consulter le CV & Parcours complet</span>
-                  <span>→</span>
-                </Link>
-              </div>
-            </div>
-          </div>
+        {/* RÉCIT PERSONNEL / FRAGMENT DE VIE */}
+        <section className="relative bg-bg-panel/50 border border-border-subtle p-8 sm:p-10 md:p-12 rounded-2xl overflow-hidden shadow-xl">
+          <div className="w-1.5 h-16 bg-cyber-yellow absolute top-8 left-0"></div>
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-cyber-yellow/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-cyber-blue/5 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="bg-bg-panel/40 border border-border-subtle p-8 rounded-xl space-y-4 relative overflow-hidden">
-            <div className="w-1.5 h-8 bg-cyber-blue absolute top-8 left-0"></div>
-            <h2 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-3">
-              Ce qui m'anime
-            </h2>
-            <div className="text-sm font-sans text-text-muted leading-relaxed space-y-3">
+          <div className="space-y-6 relative z-10 max-w-3xl">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-cyber-yellow">
+                <span>●</span> Fragment de vie & Souvenirs
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+                De 6h à midi, la musique en tête
+              </h2>
+            </div>
+
+            <blockquote className="border-l-2 border-cyber-blue/60 pl-4 sm:pl-6 py-1 italic text-white/90 text-base sm:text-lg leading-relaxed font-sans">
+              « J'écoute toujours la musique que j'écoutais quand j'étais agent de surface dans une association d'aide aux personnes souffrantes. Je nettoyais avec assiduité pendant un mois entier, de 6h à midi, tout en étant hébergé dans un foyer psy. »
+            </blockquote>
+
+            <div className="text-sm sm:text-base font-sans text-text-muted leading-relaxed space-y-4">
               <p>
-                <strong className="text-white">L'automatisation & la fiabilité :</strong> Rien n'est plus gratifiant que de concevoir des pipelines CI/CD fluides, des conteneurs légers et des infrastructures reproductibles sans friction.
+                Derrière les lignes de code, les serveurs et l'architecture logicielle, il y a une réalité beaucoup plus brute. Il y a ces matins très tôt où tout est encore silencieux, le rythme répétitif du nettoyage exécuté avec soin et rigueur, et la volonté de tenir bon, jour après jour, au sein d'un lieu dédié à celles et ceux qui traversent l'épreuve.
               </p>
               <p>
-                <strong className="text-white">La curiosité & la veille constante :</strong> Le monde du développement évolue vite. Explorer de nouveaux paradigmes, tester des outils d'observabilité et optimiser le tooling quotidien font partie intégrante de ma routine.
+                Cette assiduité forgée dans le concret — de 6h à midi pendant un mois complet depuis un foyer psychiatrique — ne m'a jamais quitté. Aujourd'hui encore, au moment même où j'écris ces lignes pour façonner ce portfolio, cette même musique tourne toujours dans mes écouteurs. Pas par hasard, mais pour me rappeler d'où je viens, garder intacts ces souvenirs et ne jamais oublier le chemin parcouru.
               </p>
-              <p>
-                <strong className="text-white">Le sens du détail :</strong> Qu'il s'agisse d'une interface réactive à la milliseconde près ou d'un Dockerfile optimisé en multi-stage, chaque détail compte.
-              </p>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center gap-6 border-t border-white/10">
+              <Link
+                to="/cv"
+                className="text-xs font-mono font-bold uppercase tracking-wider text-cyber-yellow hover:underline inline-flex items-center gap-1.5"
+              >
+                <span>Découvrir mon parcours complet</span>
+                <span>→</span>
+              </Link>
+              <Link
+                to="/music"
+                className="text-xs font-mono font-bold uppercase tracking-wider text-cyber-blue hover:underline inline-flex items-center gap-1.5"
+              >
+                <span>Explorer mon univers sonore</span>
+                <span>→</span>
+              </Link>
             </div>
           </div>
         </section>
