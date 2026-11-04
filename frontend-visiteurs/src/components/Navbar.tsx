@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
 
   const isDevActive =
     location.pathname === "/projects" ||
-    (location.pathname.startsWith("/category/") && !location.pathname.includes("devops"));
+    location.pathname.startsWith("/projects/");
 
   const isCreativeActive =
     location.pathname === "/artwork" || location.pathname === "/music";
@@ -106,17 +106,6 @@ const Navbar: React.FC = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               DEV
-            </NavLink>
-          </li>
-
-          {/* DEVOPS */}
-          <li>
-            <NavLink
-              to="/category/devops"
-              className={navLinkClass}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              DEVOPS
             </NavLink>
           </li>
 

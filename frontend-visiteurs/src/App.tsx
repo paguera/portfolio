@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
-import CategoryProjects from "./pages/CategoryProjects";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Contact from "./pages/Contact";
@@ -37,7 +36,6 @@ function App() {
             <Route path="music" element={<Productions />} />
             <Route path="projects" element={<Projects />} />
             <Route path="projects/:id" element={<ProjectDetail />} />
-            <Route path="category/:slug" element={<CategoryProjects />} />
             <Route path="liens" element={<Liens />} />
             <Route path="contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />

@@ -72,13 +72,9 @@ const Projects: React.FC = () => {
     };
   }, [lightboxImage, handleKeyDown]);
 
-  const devCategories = categories.filter(
-    (c) => c.name.toLowerCase() !== "devops"
-  );
+  const devCategories = categories;
 
-  const devProjects = projects.filter(
-    (p) => p.category_name?.toLowerCase() !== "devops"
-  );
+  const devProjects = projects;
 
   // Extract all unique technologies present in dev projects
   const availableTechnologies = useMemo(() => {

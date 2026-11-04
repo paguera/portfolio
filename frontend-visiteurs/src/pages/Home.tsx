@@ -127,12 +127,6 @@ const Home: React.FC = () => {
                 Explorer mes projets Dev
               </Link>
               <Link
-                to="/category/devops"
-                className="px-6 py-3 border-2 border-white/30 hover:border-cyber-blue text-white hover:text-cyber-blue font-black uppercase text-xs tracking-widest transition-all bg-black/50 backdrop-blur-sm"
-              >
-                Espace DevOps
-              </Link>
-              <Link
                 to="/contact"
                 className="px-6 py-3 border-2 border-transparent hover:underline text-gray-200 hover:text-white font-black uppercase text-xs tracking-widest transition-all"
               >

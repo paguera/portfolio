@@ -79,7 +79,7 @@ const ProjectDetail: React.FC = () => {
 
           {project.category_name && (
             <Link
-              to={`/category/${project.category_name.toLowerCase()}`}
+              to="/projects"
               className='font-mono text-xs uppercase px-3 py-1 rounded bg-cyber-blue/15 border border-cyber-blue/30 text-cyber-blue font-bold hover:bg-cyber-blue/25 transition-colors'
             >
               {project.category_name}
