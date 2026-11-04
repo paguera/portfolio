@@ -147,6 +147,7 @@ export interface RecentAudioPlayItem {
   id: number
   visitorUuid: string
   ip: string
+  ipLabel?: string | null
   title: string
   artist: string
   playlist: string
@@ -163,6 +164,7 @@ export interface RecentVisitItem {
   id: number
   visitorUuid: string
   ip: string
+  ipLabel?: string | null
   path: string
   browser: string
   os: string
@@ -181,6 +183,7 @@ export interface VisitorAdvancedStats {
   browsers: VisitorBreakdownItem[]
   operatingSystems: VisitorBreakdownItem[]
   recentVisits: RecentVisitItem[]
+  ipLabels?: Record<string, string>
 }
 
 export interface TelemetryPoint {

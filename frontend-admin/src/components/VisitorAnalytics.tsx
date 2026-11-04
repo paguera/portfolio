@@ -4,6 +4,12 @@ import apiFetch from '../utils/api'
 
 const VisitorAnalytics: React.FC = () => {
   const [stats, setStats] = useState<VisitorAdvancedStats | null>(null)
+  const [ipLabels, setIpLabels] = useState<Record<string, string>>({})
+  const [editingIp, setEditingIp] = useState<string | null>(null)
+  const [labelDraft, setLabelDraft] = useState<string>('')
+  const [manualIp, setManualIp] = useState<string>('')
+  const [manualLabel, setManualLabel] = useState<string>('')
+  const [savingIp, setSavingIp] = useState(false)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -14,6 +20,7 @@ const VisitorAnalytics: React.FC = () => {
     try {
       const data = await apiFetch<VisitorAdvancedStats>('/visitors/stats')
       setStats(data)
+      setIpLabels(data.ipLabels || {})
     } catch (err) {
       console.error('Erreur lors du chargement des statistiques:', err)
       setError(
@@ -26,6 +33,124 @@ const VisitorAnalytics: React.FC = () => {
       if (isRefresh) setRefreshing(false)
     }
   }, [])
+
+  const handleSaveIpLabel = async (ip: string, label: string) => {
+    const cleanIp = ip.trim()
+    if (!cleanIp) return
+    setSavingIp(true)
+    try {
+      const res = await apiFetch<{ success: boolean; ipLabels: Record<string, string> }>(
+        '/visitors/ip-label',
+        {
+          method: 'PUT',
+          body: JSON.stringify({ ip: cleanIp, label: label.trim() })
+        }
+      )
+      if (res && res.ipLabels) {
+        setIpLabels(res.ipLabels)
+      }
+      setEditingIp(null)
+      setLabelDraft('')
+    } catch (err) {
+      console.error('Erreur lors de la sauvegarde du tag IP:', err)
+    } finally {
+      setSavingIp(false)
+    }
+  }
+
+  const startEditingIp = (ip: string) => {
+    setEditingIp(ip)
+    setLabelDraft(ipLabels[ip] || '')
+  }
+
+  const renderIpCell = (rawIp: string, accent: 'secondary' | 'amber' = 'secondary') => {
+    const ip = rawIp || '127.0.0.1'
+    const currentLabel = ipLabels[ip]
+    const isEditing = editingIp === ip
+
+    const badgeClasses =
+      accent === 'amber'
+        ? 'text-amber-400 bg-amber-400/10 border-amber-400/30'
+        : 'text-secondary bg-secondary/10 border-secondary/30'
+    const dotClass = accent === 'amber' ? 'bg-amber-400' : 'bg-secondary'
+
+    return (
+      <div className='flex flex-col gap-1'>
+        <div className='flex items-center gap-1.5 flex-wrap'>
+          <span
+            className={`inline-flex items-center gap-1 font-bold border px-2 py-0.5 rounded text-[11px] w-fit ${badgeClasses}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`}></span>
+            {ip}
+          </span>
+
+          {currentLabel ? (
+            <button
+              type='button'
+              onClick={() => startEditingIp(ip)}
+              title='Cliquer pour modifier ou supprimer ce tag'
+              className='inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/25 transition-colors cursor-pointer'
+            >
+              <span>🏷️ {currentLabel}</span>
+              <span className='text-[9px] opacity-70'>✎</span>
+            </button>
+          ) : (
+            <button
+              type='button'
+              onClick={() => startEditingIp(ip)}
+              title='Associer un nom ou label à cette IP'
+              className='text-[10px] font-mono px-1.5 py-0.5 rounded border border-border-subtle text-gray-400 hover:text-white hover:border-secondary transition-colors cursor-pointer'
+            >
+              + TAG
+            </button>
+          )}
+        </div>
+
+        {isEditing && (
+          <div className='flex items-center gap-1 mt-1'>
+            <input
+              type='text'
+              value={labelDraft}
+              onChange={(e) => setLabelDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSaveIpLabel(ip, labelDraft)
+                if (e.key === 'Escape') setEditingIp(null)
+              }}
+              placeholder='Ex: Mon PC, Amina, Recruteur...'
+              autoFocus
+              className='bg-bg-main border border-secondary text-white text-[11px] px-2 py-1 rounded outline-none w-40 font-mono'
+            />
+            <button
+              type='button'
+              disabled={savingIp}
+              onClick={() => handleSaveIpLabel(ip, labelDraft)}
+              className='bg-secondary text-bg-main font-bold text-[10px] px-2 py-1 rounded uppercase hover:brightness-110 cursor-pointer'
+            >
+              OK
+            </button>
+            {currentLabel && (
+              <button
+                type='button'
+                disabled={savingIp}
+                onClick={() => handleSaveIpLabel(ip, '')}
+                title='Supprimer le label'
+                className='bg-red-500/20 text-red-400 border border-red-500/40 font-bold text-[10px] px-1.5 py-1 rounded hover:bg-red-500 hover:text-white cursor-pointer'
+              >
+                ✕
+              </button>
+            )}
+            <button
+              type='button'
+              onClick={() => setEditingIp(null)}
+              className='text-gray-400 hover:text-white text-[10px] px-1 cursor-pointer'
+            >
+              Annuler
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   useEffect(() => {
     fetchStats()
@@ -602,10 +727,7 @@ const VisitorAnalytics: React.FC = () => {
                     </td>
                     <td className='p-3 whitespace-nowrap'>
                       <div className='flex flex-col gap-0.5'>
-                        <span className='inline-flex items-center gap-1 font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded text-[11px] w-fit'>
-                          <span className='w-1.5 h-1.5 rounded-full bg-amber-400'></span>
-                          {item.ip || '127.0.0.1'}
-                        </span>
+                        {renderIpCell(item.ip || '127.0.0.1', 'amber')}
                         <span className='text-[9px] text-gray-400 font-mono truncate max-w-[140px]'>
                           ID: {item.visitorUuid ? `${item.visitorUuid.slice(0, 8)}...` : 'Anonyme'}
                         </span>
@@ -632,6 +754,75 @@ const VisitorAnalytics: React.FC = () => {
         </div>
       )}
 
+      {/* IP Tag Registry (Gestionnaire de Labels IP) */}
+      <div className='bg-bg-panel border-2 border-border-subtle p-6 shadow-xl flex flex-col gap-4'>
+        <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
+          <div>
+            <h3 className='text-base font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2'>
+              <span>🏷️</span> Répertoire_Des_IPs_Identifiées
+            </h3>
+            <p className='text-xs font-mono text-text-muted mt-0.5'>
+              Associez un nom ou une note à une adresse IP (ou cliquez directement sur « + TAG » dans les journaux ci-dessous)
+            </p>
+          </div>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              if (!manualIp.trim()) return
+              await handleSaveIpLabel(manualIp, manualLabel)
+              setManualIp('')
+              setManualLabel('')
+            }}
+            className='flex flex-wrap items-center gap-2'
+          >
+            <input
+              type='text'
+              value={manualIp}
+              onChange={(e) => setManualIp(e.target.value)}
+              placeholder='Adresse IP (ex: 82.64.x.x)'
+              className='bg-bg-main border border-border-subtle focus:border-emerald-400 text-white text-xs font-mono px-3 py-1.5 rounded outline-none w-44'
+            />
+            <input
+              type='text'
+              value={manualLabel}
+              onChange={(e) => setManualLabel(e.target.value)}
+              placeholder='Nom / Label (ex: Mon PC)'
+              className='bg-bg-main border border-border-subtle focus:border-emerald-400 text-white text-xs font-mono px-3 py-1.5 rounded outline-none w-48'
+            />
+            <button
+              type='submit'
+              disabled={savingIp || !manualIp.trim() || !manualLabel.trim()}
+              className='bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500 hover:text-black font-mono font-bold text-xs uppercase px-3 py-1.5 rounded transition-colors cursor-pointer disabled:opacity-40'
+            >
+              + Enregistrer Tag
+            </button>
+          </form>
+        </div>
+
+        {Object.keys(ipLabels).length > 0 && (
+          <div className='flex flex-wrap gap-2 pt-2 border-t border-border-subtle'>
+            {Object.entries(ipLabels).map(([ip, label]) => (
+              <div
+                key={ip}
+                className='inline-flex items-center gap-2 bg-bg-main border border-emerald-500/30 px-3 py-1.5 rounded text-xs font-mono'
+              >
+                <span className='text-emerald-400 font-bold'>🏷️ {label}</span>
+                <span className='text-gray-400'>({ip})</span>
+                <button
+                  type='button'
+                  onClick={() => handleSaveIpLabel(ip, '')}
+                  title='Supprimer ce tag'
+                  className='text-gray-500 hover:text-red-400 ml-1 cursor-pointer'
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Live Recent Visits Table */}
       <div className='bg-bg-panel border-2 border-border-subtle p-6 shadow-xl'>
         <div className='flex justify-between items-center mb-6'>
@@ -653,7 +844,7 @@ const VisitorAnalytics: React.FC = () => {
             <thead>
               <tr className='bg-bg-main text-secondary uppercase border-b border-border-subtle'>
                 <th className='p-3'>Horodatage</th>
-                <th className='p-3'>IP &amp; ID Unique</th>
+                <th className='p-3'>IP, Tag &amp; ID Unique</th>
                 <th className='p-3'>Section Consultée</th>
                 <th className='p-3'>Appareil / OS</th>
                 <th className='p-3'>Navigateur</th>
@@ -670,10 +861,7 @@ const VisitorAnalytics: React.FC = () => {
                     </td>
                     <td className='p-3 whitespace-nowrap'>
                       <div className='flex flex-col gap-0.5'>
-                        <span className='inline-flex items-center gap-1 font-bold text-secondary bg-secondary/10 border border-secondary/30 px-2 py-0.5 rounded text-[11px] w-fit'>
-                          <span className='w-1.5 h-1.5 rounded-full bg-secondary'></span>
-                          {item.ip || '127.0.0.1'}
-                        </span>
+                        {renderIpCell(item.ip || '127.0.0.1', 'secondary')}
                         <span
                           className='text-[9px] text-gray-400 font-mono truncate max-w-[140px]'
                           title={`Visiteur Unique UUID : ${item.visitorUuid}`}

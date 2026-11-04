@@ -24,4 +24,11 @@ router.get(
   visitorsController.getVisitorCount
 );
 
+router.put(
+  "/ip-label",
+  authenticate,
+  authorize(["admin"]),
+  visitorsController.updateIpLabel
+);
+
 export default router;

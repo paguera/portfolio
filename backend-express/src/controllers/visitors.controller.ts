@@ -84,3 +84,20 @@ export const getVisitorStats = async (_req: Request, res: Response) => {
     return res.status(500).json({ message: "Erreur serveur lors de la récupération des statistiques" });
   }
 };
+
+export const updateIpLabel = async (req: Request, res: Response) => {
+  try {
+    const { ip, label } = req.body || {};
+    if (!ip || typeof ip !== "string") {
+      return res.status(400).json({ message: "Adresse IP requise" });
+    }
+    const ipLabels = await visitorsModel.upsertIpLabel(
+      ip,
+      typeof label === "string" ? label : ""
+    );
+    return res.status(200).json({ success: true, ipLabels });
+  } catch (error) {
+    console.error("Error updating IP label:", error);
+    return res.status(500).json({ message: "Erreur serveur lors de la mise à jour du label IP" });
+  }
+};

@@ -35,6 +35,7 @@ export interface RecentAudioPlayItem {
   id: number;
   visitorUuid: string;
   ip: string;
+  ipLabel?: string | null;
   title: string;
   artist: string;
   playlist: string;
@@ -51,6 +52,7 @@ export interface RecentVisitItem {
   id: number;
   visitorUuid: string;
   ip: string;
+  ipLabel?: string | null;
   path: string;
   browser: string;
   os: string;
@@ -69,6 +71,7 @@ export interface VisitorAdvancedStats {
   browsers: VisitorBreakdownItem[];
   operatingSystems: VisitorBreakdownItem[];
   recentVisits: RecentVisitItem[];
+  ipLabels: Record<string, string>;
 }
 
 export function parseUserAgent(ua: string = ""): { device: string; os: string; browser: string } {
@@ -144,6 +147,12 @@ export const initVisitorsTable = async () => {
       created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS visitor_ip_labels (
+      ip VARCHAR(100) PRIMARY KEY,
+      label VARCHAR(120) NOT NULL,
+      updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at);
     CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views (path);
     CREATE INDEX IF NOT EXISTS idx_page_views_visitor ON page_views (visitor_uuid);
@@ -209,6 +218,39 @@ export const recordAudioPlay = async (
     VALUES ($1, $2, $3, $4, $5, $6, NOW());
   `;
   await db.pool.query(sql, [visitorUuid, clientIp, cleanTrackId, cleanTitle, cleanArtist, cleanPlaylist]);
+};
+
+export const upsertIpLabel = async (ip: string, label: string): Promise<Record<string, string>> => {
+  const cleanIp = ip.trim().slice(0, 100);
+  const cleanLabel = label.trim().slice(0, 120);
+
+  if (!cleanIp) {
+    return getIpLabelsMap();
+  }
+
+  if (!cleanLabel) {
+    await db.pool.query(`DELETE FROM visitor_ip_labels WHERE ip = $1`, [cleanIp]);
+  } else {
+    await db.pool.query(
+      `INSERT INTO visitor_ip_labels (ip, label, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (ip) DO UPDATE SET label = EXCLUDED.label, updated_at = NOW()`,
+      [cleanIp, cleanLabel]
+    );
+  }
+
+  return getIpLabelsMap();
+};
+
+export const getIpLabelsMap = async (): Promise<Record<string, string>> => {
+  const res = await db.pool.query(`SELECT ip, label FROM visitor_ip_labels ORDER BY updated_at DESC`);
+  const map: Record<string, string> = {};
+  for (const row of res.rows) {
+    if (row.ip && row.label) {
+      map[row.ip] = row.label;
+    }
+  }
+  return map;
 };
 
 export const getVisitorCount = async (): Promise<number> => {
@@ -459,15 +501,24 @@ export const getVisitorStats = async (): Promise<VisitorAdvancedStats> => {
     }));
   }
 
+  const ipLabels = await getIpLabelsMap();
+
   return {
     summary,
     history,
     topPages,
     topTracks,
-    recentAudioPlays,
+    recentAudioPlays: recentAudioPlays.map((item) => ({
+      ...item,
+      ipLabel: ipLabels[item.ip] || null,
+    })),
     devices,
     browsers,
     operatingSystems,
-    recentVisits,
+    recentVisits: recentVisits.map((item) => ({
+      ...item,
+      ipLabel: ipLabels[item.ip] || null,
+    })),
+    ipLabels,
   };
 };
