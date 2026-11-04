@@ -156,7 +156,7 @@ export const initSchema = async () => {
         { key: 'availability_status', value: 'Disponible pour de nouvelles opportunités' },
         { key: 'is_available', value: 'true' },
         { key: 'hero_title_accent', value: 'Développeur Full-Stack & futur DevOps' },
-        { key: 'hero_bio', value: "Passionné par la conception d'applications web robustes, l'architecture logicielle et l'automatisation des déploiements. Je construis des solutions complètes de la base de données jusqu'à l'infrastructure." }
+        { key: 'hero_bio', value: "Amoureux de la vie, créatif et bon vivant avant d'être un intitulé de poste, j'aborde le code en artisan appliqué et soucieux du moindre détail. J'aime le backend pour la rigueur de sa logique carrée autant que le frontend pour la satisfaction de toucher à tout « juste pour voir » — avec l'envie d'évoluer chaque jour vers un profil toujours plus complet et humain." }
       ]
 
       for (const s of defaultSettings) {

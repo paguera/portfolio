@@ -34,14 +34,21 @@ export function WelcomeSplash({ onComplete }: WelcomeSplashProps) {
     };
   }, [onComplete]);
 
+  const handleSkip = () => {
+    setPhase('done');
+    onComplete();
+  };
+
   return (
     <AnimatePresence>
       {phase !== 'done' && (
         <motion.div
-          className="fixed inset-0 z-[9999] bg-[#07080e] flex flex-col items-center justify-center overflow-hidden select-none"
+          className="fixed inset-0 z-[9999] bg-[#07080e] flex flex-col items-center justify-center overflow-hidden select-none cursor-pointer"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
+          onClick={handleSkip}
+          title="Cliquer pour accéder directement au site"
         >
           {/* Cyber Background Ambient Glows */}
           <motion.div

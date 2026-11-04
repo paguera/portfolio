@@ -225,7 +225,7 @@ const SoundwaveApp: React.FC = () => {
                       {currentTrack ? currentTrack.title : "Aucun titre sélectionné"}
                     </h3>
                     <p className="mobile-track-artist">
-                      {currentTrack ? currentTrack.artist : "Choisissez un morceau ci-dessous"}
+                      {currentTrack ? currentTrack.artist : "Choisissez un morceau dans la playlist"}
                     </p>
 
                     {isMobile && (

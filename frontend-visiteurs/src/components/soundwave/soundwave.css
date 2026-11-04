@@ -5,7 +5,7 @@
 .soundwave-page-wrapper {
   width: 100%;
   min-height: calc(100vh - 120px);
-  background: radial-gradient(circle at 50% 15%, #252831 0%, #181a20 55%, #121316 100%);
+  background: transparent;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -234,7 +234,13 @@
 /* Canvas Viewport Frame */
 .canvas-wrapper {
   position: relative;
-  background: var(--bg-card);
+  background-color: var(--bg-card);
+  background-image: linear-gradient(
+    135deg,
+    rgba(250, 204, 21, 0.05) 0%,
+    rgba(56, 189, 248, 0.05) 50%,
+    rgba(168, 85, 247, 0.07) 100%
+  );
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 10px;
@@ -242,11 +248,18 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35),
               inset 0 1px 0 rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, background-image 0.4s ease;
 }
 
 .canvas-wrapper:hover {
-  border-color: rgba(251, 191, 36, 0.3);
+  border-color: rgba(251, 191, 36, 0.45);
+  background-image: linear-gradient(
+    135deg,
+    rgba(250, 204, 21, 0.12) 0%,
+    rgba(56, 189, 248, 0.10) 50%,
+    rgba(168, 85, 247, 0.15) 100%
+  );
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.15);
 }
 
 /* Fullscreen control button */
@@ -490,7 +503,13 @@
    PLAYLIST CARD & CATEGORIES
    ========================================================================== */
 .playlist-card {
-  background: var(--bg-card);
+  background-color: var(--bg-card);
+  background-image: linear-gradient(
+    135deg,
+    rgba(250, 204, 21, 0.05) 0%,
+    rgba(56, 189, 248, 0.05) 50%,
+    rgba(168, 85, 247, 0.07) 100%
+  );
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.25rem;
@@ -500,6 +519,18 @@
   flex-direction: column;
   gap: 1rem;
   height: 100%;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, background-image 0.4s ease;
+}
+
+.playlist-card:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  background-image: linear-gradient(
+    135deg,
+    rgba(250, 204, 21, 0.12) 0%,
+    rgba(56, 189, 248, 0.10) 50%,
+    rgba(168, 85, 247, 0.15) 100%
+  );
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.15);
 }
 
 .playlist-header {
@@ -1079,6 +1110,14 @@
   .soundwave-app .main-content {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+
+  .soundwave-app .sidebar-section {
+    order: 1;
+  }
+
+  .soundwave-app .visualizer-section {
+    order: 2;
   }
 
   .player-bar {
